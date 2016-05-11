@@ -1,5 +1,6 @@
 package com.heaven;
 
+import com.heaven.osm.controller.OpenStreetMapParser;
 import org.apache.log4j.Logger;
 
 /**
@@ -14,6 +15,14 @@ public class App
     public static void main( String[] args )
     {
         LOGGER.info("app launch.");
-        System.out.println( "Hello World!" );
+
+        if (args.length != 1){
+            LOGGER.error("missing input file.");
+            System.out.println( "missing input file!" );
+            return;
+        }
+
+        OpenStreetMapParser parser = new OpenStreetMapParser();
+        parser.run(args[0]);
     }
 }
