@@ -1,6 +1,7 @@
 package com.heaven;
 
 import com.heaven.osm.controller.OpenStreetMapParser;
+import com.heaven.osm.controller.PostgresqlAdapter;
 import org.apache.log4j.Logger;
 
 /**
@@ -21,6 +22,8 @@ public class App
             System.out.println( "missing input file!" );
             return;
         }
+
+        PostgresqlAdapter.sharedInstance().test();
 
         OpenStreetMapParser parser = new OpenStreetMapParser();
         parser.run(args[0]);
