@@ -2,6 +2,7 @@ package com.heaven.osm.controller;
 
 
 import com.heaven.osm.Utils;
+import com.heaven.osm.model.OSMNode;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.beans.PropertyVetoException;
@@ -76,5 +77,49 @@ public class PostgresqlAdapter {
                 e1.printStackTrace();
             }
         }
+    }
+
+    public void saveNode(OSMNode node){
+//        'INSERT INTO "node"(' .
+//        '"id", "visible", "version", "changeset", "timestamp", "user", "uid", "wgs84long_lat")' .
+//        'VALUES' .
+//        '($1, $2, $3, $4, to_timestamp($5, \'YYYY-MM-DD HH24:MI:SS \'), $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326))');
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            statement = conn.prepareStatement("INSERT INTO node(id, visible, version, changeset, timestamp, user, uid, wgs84long_lat) " +
+            "VALUES " +
+            "(?, ?, ?, ?, to_timestamp(?, \\'YYYY-MM-DD HH24:MI:SS \\'), ?, ?, ST_SetSRID(ST_MakePoint(?, ?), 4326))");
+
+            String id = node.attr.containsKey("id") ? node.attr.get("id") : "";
+            String visible = node.attr.containsKey("visible") ? node.attr.get("id") : "";
+
+            statement.setString(1, id);
+            statement.setString(2, lr.getToken());
+
+
+            int rowsAffacted = statement.executeUpdate();
+            if (rowsAffacted == 0) {
+                statement.close();
+                conn.close();
+            }
+
+            statement.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
     }
 }
