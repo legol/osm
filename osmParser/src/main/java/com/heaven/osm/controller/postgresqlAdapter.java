@@ -2,7 +2,9 @@ package com.heaven.osm.controller;
 
 
 import com.heaven.osm.Utils;
+import com.heaven.osm.model.OSMMember;
 import com.heaven.osm.model.OSMNode;
+import com.heaven.osm.model.OSMRelation;
 import com.heaven.osm.model.OSMWay;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import javafx.util.Pair;
@@ -289,4 +291,95 @@ public class PostgresqlAdapter {
 
         return true;
     }
+
+    public boolean saveRelation(OSMRelation relation) {
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            conn.setAutoCommit(false); // make sure the way, way_tag and way_nd are inserted in the same time.
+
+            // save way
+            statement = conn.prepareStatement("INSERT INTO relation(id, visible, version, changeset, \"timestamp\", \"user\", uid) VALUES (?, ?, ?, ?, to_timestamp(?, 'YYYY-MM-DD HH24:MI:SS '), ?, ?)");
+
+            long id = relation.attr.containsKey("id") ? Long.parseLong(relation.attr.get("id")) : 0L;
+            boolean visible = relation.attr.containsKey("visible") ? Boolean.parseBoolean(relation.attr.get("visible")) : true;
+            long version = relation.attr.containsKey("version") ? Long.parseLong(relation.attr.get("version")) : 0L;
+            long changeset = relation.attr.containsKey("changeset") ? Long.parseLong(relation.attr.get("changeset")) : 0L;
+            String timestamp = relation.attr.containsKey("timestamp") ? relation.attr.get("timestamp") : "";
+            timestamp = timestamp.replace('T', ' ').replace('Z', ' ');
+            String user = relation.attr.containsKey("user") ? relation.attr.get("user") : "";
+            long uid = relation.attr.containsKey("uid") ? Long.parseLong(relation.attr.get("uid")) : 0L;
+
+            statement.setLong(1, id);
+            statement.setBoolean(2, visible);
+            statement.setLong(3, version);
+            statement.setLong(4, changeset);
+            statement.setString(5, timestamp);
+            statement.setString(6, user);
+            statement.setLong(7, uid);
+
+            int rowsAffacted = statement.executeUpdate();
+            if (rowsAffacted == 0) {
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save relation_tag
+            if (saveTag(relation.tag, conn, "relation", id) == false){
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save relation_member
+            if (relation.member.size() > 0) {
+                statement = conn.prepareStatement("INSERT INTO relation_member(relation_ref, type, ref, role) VALUES (?, ?, ?, ?)");
+
+                for (int i = 0; i < relation.member.size(); i++){
+                    OSMMember member = relation.member.get(i);
+
+                    statement.setLong(1, id);
+                    statement.setString(2, member.type);
+                    statement.setLong(3, Long.parseLong(member.ref));
+                    statement.setString(4, member.role);
+
+                    rowsAffacted = statement.executeUpdate();
+                    if (rowsAffacted == 0) {
+                        statement.close();
+                        conn.close();
+                        return false;
+                    }
+                }
+            }
+
+            // save to db
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            statement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                conn.close();
+                statement.close();
+
+                return false;
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
