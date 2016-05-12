@@ -179,11 +179,11 @@ class OSMHandler extends DefaultHandler {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     protected void saveNode(OSMNode node){
-        PostgresqlAdapter.sharedInstance().saveNode(node);
+        //PostgresqlAdapter.sharedInstance().saveNode(node);
     }
 
     protected void saveWay(OSMWay way){
-
+        PostgresqlAdapter.sharedInstance().saveWay(way);
     }
 
     protected void saveRelation(OSMRelation relation){

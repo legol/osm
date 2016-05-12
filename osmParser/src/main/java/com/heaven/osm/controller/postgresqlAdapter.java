@@ -3,19 +3,24 @@ package com.heaven.osm.controller;
 
 import com.heaven.osm.Utils;
 import com.heaven.osm.model.OSMNode;
+import com.heaven.osm.model.OSMWay;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import javafx.util.Pair;
+import org.apache.log4j.Logger;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
 
 /**
  * Created by chenjie3 on 2016/5/11.
  */
 public class PostgresqlAdapter {
+    private static final Logger LOGGER = Logger.getLogger(PostgresqlAdapter.class);
 
     private static PostgresqlAdapter instance = null;
 
@@ -79,7 +84,48 @@ public class PostgresqlAdapter {
         }
     }
 
-    public boolean saveNode(OSMNode node){
+    private boolean saveTag(List<Pair<String, String>> tag, Connection conn, String tagType, long id){
+        if (tag.size() > 0) {
+            PreparedStatement statement = null;
+            try {
+
+                if (tagType.compareToIgnoreCase("node") == 0){
+                    statement = conn.prepareStatement("INSERT INTO node_tag(nd_ref, k, v) VALUES (?, ?, ?)");
+                }
+                else if (tagType.compareToIgnoreCase("way") == 0){
+                    statement = conn.prepareStatement("INSERT INTO way_tag(way_ref, k, v) VALUES (?, ?, ?)");
+                }
+                else if (tagType.compareToIgnoreCase("relation") == 0){
+                    statement = conn.prepareStatement("INSERT INTO relation_tag(relation_ref, k, v) VALUES (?, ?, ?)");
+                }
+                else{
+                    LOGGER.error("unknown tag type:" + tagType);
+                    return false;
+                }
+
+                for (int i = 0; i < tag.size(); i++) {
+                    String k = tag.get(i).getKey();
+                    String v = tag.get(i).getValue();
+
+                    statement.setLong(1, id);
+                    statement.setString(2, k);
+                    statement.setString(3, v);
+
+                    int rowsAffacted = statement.executeUpdate();
+                    if (rowsAffacted == 0) {
+                        return false;
+                    }
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean saveNode(OSMNode node) {
         Connection conn = null;
         PreparedStatement statement = null;
 
@@ -90,8 +136,8 @@ public class PostgresqlAdapter {
 
             // save node
             statement = conn.prepareStatement("INSERT INTO node(id, visible, version, changeset, \"timestamp\", \"user\", uid, wgs84long_lat) " +
-            "VALUES " +
-            "(?, ?, ?, ?, to_timestamp(?, 'YYYY-MM-DD HH24:MI:SS '), ?, ?, ST_SetSRID(ST_MakePoint(?, ?), 4326))");
+                    "VALUES " +
+                    "(?, ?, ?, ?, to_timestamp(?, 'YYYY-MM-DD HH24:MI:SS '), ?, ?, ST_SetSRID(ST_MakePoint(?, ?), 4326))");
 
             long id = node.attr.containsKey("id") ? Long.parseLong(node.attr.get("id")) : 0L;
             boolean visible = node.attr.containsKey("visible") ? Boolean.parseBoolean(node.attr.get("visible")) : true;
@@ -123,26 +169,13 @@ public class PostgresqlAdapter {
             statement.close();
 
             // save node_tag
-            if (node.tag.size() > 0){
-                statement = conn.prepareStatement("INSERT INTO node_tag(nd_ref, k, v) VALUES (?, ?, ?)");
-
-                for (int i = 0; i < node.tag.size(); i++){
-                    String k = node.tag.get(i).getKey();
-                    String v = node.tag.get(i).getValue();
-
-                    statement.setLong(1, id);
-                    statement.setString(2, k);
-                    statement.setString(3, v);
-
-                    rowsAffacted = statement.executeUpdate();
-                    if (rowsAffacted == 0) {
-                        statement.close();
-                        conn.close();
-                        return false;
-                    }
-                }
+            if (saveTag(node.tag, conn, "node", id) == false){
+                statement.close();
+                conn.close();
+                return false;
             }
 
+            // save to db
             conn.commit();
             conn.setAutoCommit(true);
 
@@ -155,8 +188,102 @@ public class PostgresqlAdapter {
             try {
                 statement.close();
                 conn.close();
+
+                return false;
             } catch (SQLException e1) {
                 e1.printStackTrace();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean saveWay(OSMWay way) {
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            conn.setAutoCommit(false); // make sure the way, way_tag and way_nd are inserted in the same time.
+
+            // save way
+            statement = conn.prepareStatement("INSERT INTO way(id, visible, version, changeset, \"timestamp\", \"user\", uid) " +
+                    " VALUES " +
+                    "(?, ?, ?, ?, to_timestamp(?, 'YYYY-MM-DD HH24:MI:SS '), ?, ?)");
+
+            long id = way.attr.containsKey("id") ? Long.parseLong(way.attr.get("id")) : 0L;
+            boolean visible = way.attr.containsKey("visible") ? Boolean.parseBoolean(way.attr.get("visible")) : true;
+            long version = way.attr.containsKey("version") ? Long.parseLong(way.attr.get("version")) : 0L;
+            long changeset = way.attr.containsKey("changeset") ? Long.parseLong(way.attr.get("changeset")) : 0L;
+            String timestamp = way.attr.containsKey("timestamp") ? way.attr.get("timestamp") : "";
+            timestamp = timestamp.replace('T', ' ').replace('Z', ' ');
+            String user = way.attr.containsKey("user") ? way.attr.get("user") : "";
+            long uid = way.attr.containsKey("uid") ? Long.parseLong(way.attr.get("uid")) : 0L;
+
+            statement.setLong(1, id);
+            statement.setBoolean(2, visible);
+            statement.setLong(3, version);
+            statement.setLong(4, changeset);
+            statement.setString(5, timestamp);
+            statement.setString(6, user);
+            statement.setLong(7, uid);
+
+            int rowsAffacted = statement.executeUpdate();
+            if (rowsAffacted == 0) {
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save way_tag
+            if (saveTag(way.tag, conn, "way", id) == false){
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save way_nd
+            if (way.nd.size() > 0) {
+                statement = conn.prepareStatement("INSERT INTO way_nd(way_ref, nd_ref) VALUES (?, ?)");
+
+                for (int i = 0; i < way.nd.size(); i++){
+                    long nd_ref = Long.parseLong(way.nd.get(i));
+
+                    statement.setLong(1, id);
+                    statement.setLong(2, nd_ref);
+
+                    rowsAffacted = statement.executeUpdate();
+                    if (rowsAffacted == 0) {
+                        statement.close();
+                        conn.close();
+                        return false;
+                    }
+                }
+            }
+
+            // save to db
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            statement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                conn.close();
+                statement.close();
+
+                return false;
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+
+                return false;
             }
         }
 
