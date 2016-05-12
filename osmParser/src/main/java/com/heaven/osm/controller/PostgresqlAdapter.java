@@ -2,10 +2,7 @@ package com.heaven.osm.controller;
 
 
 import com.heaven.osm.Utils;
-import com.heaven.osm.model.OSMMember;
-import com.heaven.osm.model.OSMNode;
-import com.heaven.osm.model.OSMRelation;
-import com.heaven.osm.model.OSMWay;
+import com.heaven.osm.model.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
@@ -15,8 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by chenjie3 on 2016/5/11.
@@ -51,39 +47,6 @@ public class PostgresqlAdapter {
             instance = new PostgresqlAdapter();
         }
         return instance;
-    }
-
-    // insert into node("id", "wgs84long_lat") values (10, ST_SetSRID(ST_MakePoint(123.4, 567.8), 4326))
-    public void test() {
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-
-        try {
-            conn = cpds.getConnection();
-
-            statement = conn.prepareStatement("select id, ST_AsText(wgs84long_lat) as pos from node");
-            rs = statement.executeQuery();
-
-            while (rs.next()) {
-                System.out.println(rs.getString("id") + ":" + rs.getString("pos"));
-            }
-
-            statement.close();
-            rs.close();
-            conn.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                statement.close();
-                rs.close();
-                conn.close();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-        }
     }
 
     private boolean saveTag(List<Pair<String, String>> tag, Connection conn, String tagType, long id){
@@ -382,4 +345,288 @@ public class PostgresqlAdapter {
         return true;
     }
 
+    // return all nodes that are related to a relation.
+    public List<GeomPoint> getPointsOfRelation(long relation_ref){
+        List<GeomPoint> points = new LinkedList<GeomPoint>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            // 1. select all nodes that are on the ways of the relation.
+            statement = conn.prepareStatement("select ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node " +
+                    "right join " +
+                    "(select distinct way_nd.nd_ref as nd_ref from way_nd where way_nd.way_ref in " +
+                    "(select relation_member.ref as way_ref from relation_member where relation_member.type='way' and relation_member.relation_ref=?)) as nodes " +
+                    "on nodes.nd_ref=node.id");
+
+            statement.setLong(1, relation_ref);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                GeomPoint point = new GeomPoint();
+                point.longitude = rs.getDouble("lon");
+                point.latitude = rs.getDouble("lat");
+
+                points.add(point);
+            }
+            statement.close();
+
+            // 2. select all nodes that are referenced by the relation
+            statement = conn.prepareStatement("select ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node " +
+                    "right join " +
+                    "(select relation_member.ref as nd_ref from relation_member where relation_member.type='node' and relation_member.relation_ref=?) as nodes " +
+                    "on nodes.nd_ref=node.id");
+
+            statement.setLong(1, relation_ref);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                GeomPoint point = new GeomPoint();
+                point.longitude = rs.getDouble("lon");
+                point.latitude = rs.getDouble("lat");
+
+                points.add(point);
+            }
+            statement.close();
+
+            // 3. select all relation,aka relation_ref2, that are referenced by this relation
+            // 4. for all relation_ref2, call this function again.
+            statement = conn.prepareStatement("select relation_member.ref as relation_ref2 from relation_member where relation_member.type='relation' and relation_member.relation_ref=?");
+
+            statement.setLong(1, relation_ref);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                List<GeomPoint> newPoints = getPointsOfRelation(rs.getLong("relation_ref2"));
+
+                points.addAll(newPoints);
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return points;
+    }
+
+    // return all relation_ref
+    public List<Long> getRelations(){
+        List<Long> relations = new LinkedList<Long>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            // 1. select all nodes that are on the ways of the relation.
+            statement = conn.prepareStatement("select relation.id as relation_ref from relation");
+            rs = statement.executeQuery();
+            while (rs.next()){
+                relations.add(rs.getLong("relation_ref"));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return relations;
+    }
+
+    // save bounding box of a relation
+    public boolean saveRelationBoundingBox(long relation_ref, GeomBox boundingBox){
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            conn.setAutoCommit(false); // make sure the node and its tags are inserted in the same time.
+
+            // save bounding_box
+            statement = conn.prepareStatement("insert into relation_bounding_box(relation_ref, minlon, minlat, maxlon, maxlat) values (?, ?, ?, ?, ?)");
+
+            statement.setLong(1, relation_ref);
+            statement.setDouble(2, boundingBox.minlon);
+            statement.setDouble(3, boundingBox.minlat);
+            statement.setDouble(4, boundingBox.maxlon);
+            statement.setDouble(5, boundingBox.maxlat);
+
+            int rowsAffacted = statement.executeUpdate();
+            if (rowsAffacted == 0) {
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save to db
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            statement.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                statement.close();
+                conn.close();
+
+                return false;
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public List<Long> getWays(){
+        List<Long> ways = new LinkedList<Long>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            // 1. select all nodes that are on the ways of the relation.
+            statement = conn.prepareStatement("select way.id as way_ref from way");
+            rs = statement.executeQuery();
+            while (rs.next()){
+                ways.add(rs.getLong("way_ref"));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return ways;
+    }
+
+    public List<GeomPoint> getPointsOfWay(long way_ref){
+        List<GeomPoint> points = new LinkedList<GeomPoint>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            // 1. select all nodes that are on the ways of the relation.
+            statement = conn.prepareStatement("select ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node " +
+                    "right join " +
+                    "(select way_nd.nd_ref from way_nd where way_nd.way_ref=?) as nodes " +
+                    "on node.id = nodes.nd_ref");
+            statement.setLong(1, way_ref);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                GeomPoint point = new GeomPoint();
+                point.longitude = rs.getDouble("lon");
+                point.latitude = rs.getDouble("lat");
+
+                points.add(point);
+            }
+
+            statement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return points;
+    }
+
+    public boolean saveWayBoundingBox(long way_ref, GeomBox boundingBox){
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            conn.setAutoCommit(false); // make sure the node and its tags are inserted in the same time.
+
+            // save bounding_box
+            statement = conn.prepareStatement("insert into way_bounding_box(way_ref, minlon, minlat, maxlon, maxlat) values (?, ?, ?, ?, ?)");
+
+            statement.setLong(1, way_ref);
+            statement.setDouble(2, boundingBox.minlon);
+            statement.setDouble(3, boundingBox.minlat);
+            statement.setDouble(4, boundingBox.maxlon);
+            statement.setDouble(5, boundingBox.maxlat);
+
+            int rowsAffacted = statement.executeUpdate();
+            if (rowsAffacted == 0) {
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save to db
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            statement.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                statement.close();
+                conn.close();
+
+                return false;
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

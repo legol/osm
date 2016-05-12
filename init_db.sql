@@ -18,7 +18,8 @@ DROP INDEX IF EXISTS "node_tag_nd_ref";
 DROP TABLE IF EXISTS "node_tag";
 DROP TABLE IF EXISTS "node";
 
-
+DROP TABLE IF EXISTS "relation_bounding_box";
+DROP TABLE IF EXISTS "way_bounding_box";
 
 
 CREATE TABLE "node"(
@@ -108,4 +109,28 @@ CREATE TABLE "relation_tag"(
 	FOREIGN KEY ("relation_ref") REFERENCES "relation"("id") ON DELETE CASCADE
 );
 CREATE INDEX "relation_tag_relation_ref" ON "relation_tag"("relation_ref");
+
+
+CREATE TABLE "way_bounding_box"(
+	"way_ref" bigint NOT NULL,
+	"minlat" float(32),
+	"minlon" float(32),
+	"maxlat" float(32),
+	"maxlon" float(32),
+	PRIMARY KEY("way_ref"),
+	FOREIGN KEY ("way_ref") REFERENCES "way"("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE "relation_bounding_box"(
+	"relation_ref" bigint NOT NULL,
+	"minlat" float(32),
+	"minlon" float(32),
+	"maxlat" float(32),
+	"maxlon" float(32),
+	PRIMARY KEY("relation_ref"),
+	FOREIGN KEY ("relation_ref") REFERENCES "relation"("id") ON DELETE CASCADE
+);
+
+
 
