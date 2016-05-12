@@ -26,7 +26,7 @@ CREATE TABLE "node"(
 	"visible" boolean,
 	"version" bigint,
 	"changeset" bigint,
-	"timestamp" timestamp,
+	"timestamp" timestamp with time zone,
 	"user" varchar(100),
 	"uid" bigint,
 	"wgs84long_lat" geometry NOT NULL,	
@@ -49,7 +49,7 @@ CREATE TABLE "way"(
 	"visible" boolean,
 	"version" bigint,
 	"changeset" bigint,
-	"timestamp" timestamp,
+	"timestamp" timestamp with time zone,
 	"user" varchar(100),
 	"uid" bigint,
 	PRIMARY KEY("id")
@@ -84,7 +84,7 @@ CREATE TABLE "relation"(
 	"visible" boolean,
 	"version" bigint,
 	"changeset" bigint,
-	"timestamp" timestamp,
+	"timestamp" timestamp with time zone,
 	"user" varchar(100),
 	"uid" bigint,
 	PRIMARY KEY("id")

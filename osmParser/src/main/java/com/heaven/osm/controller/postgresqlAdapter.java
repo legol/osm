@@ -79,33 +79,72 @@ public class PostgresqlAdapter {
         }
     }
 
-    public void saveNode(OSMNode node){
-//        'INSERT INTO "node"(' .
-//        '"id", "visible", "version", "changeset", "timestamp", "user", "uid", "wgs84long_lat")' .
-//        'VALUES' .
-//        '($1, $2, $3, $4, to_timestamp($5, \'YYYY-MM-DD HH24:MI:SS \'), $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326))');
+    public boolean saveNode(OSMNode node){
         Connection conn = null;
         PreparedStatement statement = null;
 
         try {
             conn = cpds.getConnection();
 
-            statement = conn.prepareStatement("INSERT INTO node(id, visible, version, changeset, timestamp, user, uid, wgs84long_lat) " +
+            conn.setAutoCommit(false); // make sure the node and its tags are inserted in the same time.
+
+            // save node
+            statement = conn.prepareStatement("INSERT INTO node(id, visible, version, changeset, \"timestamp\", \"user\", uid, wgs84long_lat) " +
             "VALUES " +
-            "(?, ?, ?, ?, to_timestamp(?, \\'YYYY-MM-DD HH24:MI:SS \\'), ?, ?, ST_SetSRID(ST_MakePoint(?, ?), 4326))");
+            "(?, ?, ?, ?, to_timestamp(?, 'YYYY-MM-DD HH24:MI:SS '), ?, ?, ST_SetSRID(ST_MakePoint(?, ?), 4326))");
 
-            String id = node.attr.containsKey("id") ? node.attr.get("id") : "";
-            String visible = node.attr.containsKey("visible") ? node.attr.get("id") : "";
+            long id = node.attr.containsKey("id") ? Long.parseLong(node.attr.get("id")) : 0L;
+            boolean visible = node.attr.containsKey("visible") ? Boolean.parseBoolean(node.attr.get("visible")) : true;
+            long version = node.attr.containsKey("version") ? Long.parseLong(node.attr.get("version")) : 0L;
+            long changeset = node.attr.containsKey("changeset") ? Long.parseLong(node.attr.get("changeset")) : 0L;
+            String timestamp = node.attr.containsKey("timestamp") ? node.attr.get("timestamp") : "";
+            timestamp = timestamp.replace('T', ' ').replace('Z', ' ');
+            String user = node.attr.containsKey("user") ? node.attr.get("user") : "";
+            long uid = node.attr.containsKey("uid") ? Long.parseLong(node.attr.get("uid")) : 0L;
+            double lon = node.attr.containsKey("lon") ? Double.parseDouble(node.attr.get("lon")) : 0.0;
+            double lat = node.attr.containsKey("lat") ? Double.parseDouble(node.attr.get("lat")) : 0.0;
 
-            statement.setString(1, id);
-            statement.setString(2, lr.getToken());
-
+            statement.setLong(1, id);
+            statement.setBoolean(2, visible);
+            statement.setLong(3, version);
+            statement.setLong(4, changeset);
+            statement.setString(5, timestamp);
+            statement.setString(6, user);
+            statement.setLong(7, uid);
+            statement.setDouble(8, lon);
+            statement.setDouble(9, lat);
 
             int rowsAffacted = statement.executeUpdate();
             if (rowsAffacted == 0) {
                 statement.close();
                 conn.close();
+                return false;
             }
+            statement.close();
+
+            // save node_tag
+            if (node.tag.size() > 0){
+                statement = conn.prepareStatement("INSERT INTO node_tag(nd_ref, k, v) VALUES (?, ?, ?)");
+
+                for (int i = 0; i < node.tag.size(); i++){
+                    String k = node.tag.get(i).getKey();
+                    String v = node.tag.get(i).getValue();
+
+                    statement.setLong(1, id);
+                    statement.setString(2, k);
+                    statement.setString(3, v);
+
+                    rowsAffacted = statement.executeUpdate();
+                    if (rowsAffacted == 0) {
+                        statement.close();
+                        conn.close();
+                        return false;
+                    }
+                }
+            }
+
+            conn.commit();
+            conn.setAutoCommit(true);
 
             statement.close();
             conn.close();
@@ -121,5 +160,6 @@ public class PostgresqlAdapter {
             }
         }
 
+        return true;
     }
 }
