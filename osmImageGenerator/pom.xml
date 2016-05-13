@@ -121,6 +121,14 @@
     </dependency>
     <!-- mysql end-->
 
+      <!--postgreSQL begin-->
+      <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <version>9.4.1208.jre7</version>
+      </dependency>
+      <!--postgreSQL end-->
+
     <!-- apache http client begin-->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -149,6 +157,8 @@
                   <include>*.properties</include>
                   <include>*.json</include>
                   <include>*.xml</include>
+                  <include>*.jpg</include>
+                  <include>*.png</include>
                   <include>jdbc/*.properties</include>
                   <include>jdbc/*.xml</include>
               </includes>
