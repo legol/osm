@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS "node";
 
 DROP TABLE IF EXISTS "relation_bounding_box";
 DROP TABLE IF EXISTS "way_bounding_box";
+DROP TABLE IF EXISTS "relation_top_level";
 
 
 CREATE TABLE "node"(
@@ -128,6 +129,24 @@ CREATE TABLE "relation_bounding_box"(
 	"minlon" float(32),
 	"maxlat" float(32),
 	"maxlon" float(32),
+	PRIMARY KEY("relation_ref"),
+	FOREIGN KEY ("relation_ref") REFERENCES "relation"("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE "relation_bounding_box"(
+	"relation_ref" bigint NOT NULL,
+	"minlat" float(32),
+	"minlon" float(32),
+	"maxlat" float(32),
+	"maxlon" float(32),
+	PRIMARY KEY("relation_ref"),
+	FOREIGN KEY ("relation_ref") REFERENCES "relation"("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE "top_level_relation"(
+	"relation_ref" bigint NOT NULL,
 	PRIMARY KEY("relation_ref"),
 	FOREIGN KEY ("relation_ref") REFERENCES "relation"("id") ON DELETE CASCADE
 );

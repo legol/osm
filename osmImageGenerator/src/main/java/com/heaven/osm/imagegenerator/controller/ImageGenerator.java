@@ -2,6 +2,7 @@ package com.heaven.osm.imagegenerator.controller;
 
 import com.heaven.osm.imagegenerator.model.GenerateImageRequest;
 import com.heaven.osm.imagegenerator.model.GeomBox;
+import com.heaven.osm.imagegenerator.model.PostgresqlAdapter;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,10 +13,12 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 
 
 @Controller
@@ -69,12 +72,16 @@ public class ImageGenerator {
     public void generateImage(HttpServletRequest request, @RequestBody GenerateImageRequest generateImageRequest,
                               HttpServletResponse response){
 
-        ByteArrayOutputStream jpegOutputStream = new ByteArrayOutputStream();
-
+        ByteArrayOutputStream jpegOutputStream = null;
         try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream inputStream = loader.getResourceAsStream("test.jpg");
-            BufferedImage bufferedImage = ImageIO.read(inputStream);
+            BufferedImage bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics2D g = bufferedImage.createGraphics();
+
+            OSMDrawer.sharedInstance().drawOSM(generateImageRequest.boundingBox,
+                    generateImageRequest.imageWidth, generateImageRequest.imageHeight,
+                    g);
+
+            jpegOutputStream = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "jpeg", jpegOutputStream);
         } catch (IllegalArgumentException e) {
             try {

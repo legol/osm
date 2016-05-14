@@ -9,13 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class GenerateImageRequest {
-    @JsonProperty("boundingBox")
-    public GeomBox boundingBox;
+public class PostgisGeom {
+    @JsonProperty("type")
+    public String type;
 
-    @JsonProperty("image_width")
-    public int imageWidth;
-
-    @JsonProperty("image_height")
-    public int imageHeight;
+    @JsonProperty("coordinates")
+    double coordinates[];
 }

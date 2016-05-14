@@ -9,45 +9,32 @@
   <url>http://maven.apache.org</url>
 
   <profiles>
-    <profile>
-      <id>debug</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-        <log.dir>C:/my_own_work/soulmate/logs</log.dir>
-        <log.file>login.log</log.file>
-        <mysql.jdbcUrl>jdbc:mysql://127.0.0.1/soulmate</mysql.jdbcUrl>
-        <mysql.user>root</mysql.user>
-        <mysql.password>CjTm803048</mysql.password>
-        <myself.binding_ip>127.0.0.1</myself.binding_ip>
-      </properties>
-    </profile>
-    <profile>
-      <id>home</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <log.dir>C:/Projects/osm/logs</log.dir>
-        <log.file>login.log</log.file>
-        <mysql.jdbcUrl>jdbc:mysql://106.185.33.7:5454/soulmate</mysql.jdbcUrl>
-        <mysql.user>root</mysql.user>
-        <mysql.password>CjTm803048</mysql.password>
-        <myself.binding_ip>127.0.0.1</myself.binding_ip>
-      </properties>
-    </profile>
-    <profile>
-      <id>production</id>
-      <properties>
-        <log.dir>/home/ubuntu/software_install/apache-tomcat-8.0.26/logs/osm</log.dir>
-        <log.file>login.log</log.file>
-        <mysql.jdbcUrl>jdbc:mysql://106.185.33.7:5454/soulmate</mysql.jdbcUrl>
-        <mysql.user>root</mysql.user>
-        <mysql.password>CjTm803048</mysql.password>
-        <myself.binding_ip>106.185.33.7</myself.binding_ip>
-      </properties>
-    </profile>
+
+      <profile>
+          <id>debug</id>
+          <activation>
+              <activeByDefault>true</activeByDefault>
+          </activation>
+          <properties>
+              <log.dir>C:/Projects/osm/logs</log.dir>
+              <log.file>osmParser.log</log.file>
+              <postgresql.jdbcUrl>jdbc:postgresql://192.168.91.129:5432/osm</postgresql.jdbcUrl>
+              <postgresql.user>postgres</postgresql.user>
+              <postgresql.password>CjTm803048</postgresql.password>
+          </properties>
+      </profile>
+
+      <profile>
+          <id>production</id>
+          <properties>
+              <log.dir>/home/ubuntu/osm/logs</log.dir>
+              <log.file>osmParser.log</log.file>
+              <postgresql.jdbcUrl>jdbc:postgresql://192.168.95.129:5432/osm</postgresql.jdbcUrl>
+              <postgresql.user>postgres</postgresql.user>
+              <postgresql.password>CjTm803048</postgresql.password>
+          </properties>
+      </profile>
+
   </profiles>
 
 
