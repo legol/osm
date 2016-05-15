@@ -29,11 +29,13 @@ public class OSMDrawer {
 
         List<Long> drawnWays = new LinkedList<Long>(); // ways that have been drawn.
 
+        g.setColor(Color.blue);
         List<Long> relations = PostgresqlAdapter.sharedInstance().getTopLevelRelationsByBoundingBox(boundingBox);
         for (int i = 0; i < relations.size(); i++){
             drawRelation(relations.get(i).longValue(), boundingBox, imageWidth, imageHeight, g, drawnWays);
         }
 
+        g.setColor(Color.yellow);
         List<Long> ways = PostgresqlAdapter.sharedInstance().getWaysByBoundingBox(boundingBox);
         for (int i = 0; i < ways.size(); i++){
             if (!drawnWays.contains(ways.get(i).longValue())){
@@ -48,7 +50,20 @@ public class OSMDrawer {
                              GeomBox boundingBox, int imageWidth, int imageHeight,
                              Graphics2D g,
                              List<Long>drawnWays){
+        List<Long> relations = PostgresqlAdapter.sharedInstance().getRelationsOfRelation(relation);
+        for (int i = 0; i < relations.size(); i++){
+            drawRelation(relations.get(i).longValue(),
+                    boundingBox, imageWidth, imageHeight,
+                    g,
+                    drawnWays);
+        }
 
+        List<Long> ways = PostgresqlAdapter.sharedInstance().getWaysOfRelation(relation);
+        for (int i = 0; i < ways.size(); i++){
+            if (!drawnWays.contains(ways.get(i).longValue())){
+                drawWay(ways.get(i).longValue(), boundingBox, imageWidth, imageHeight, g, drawnWays);
+            }
+        }
     }
 
     public GraphicsPoint GeomPoint2GraphicsPoint(GeomPoint geomPoint, GeomBox boundingBox, int imageWidth, int imageHeight){

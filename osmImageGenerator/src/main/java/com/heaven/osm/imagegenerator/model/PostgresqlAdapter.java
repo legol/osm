@@ -182,4 +182,72 @@ public class PostgresqlAdapter {
 
         return points;
     }
+
+    public List<Long> getWaysOfRelation(long relation){
+        List<Long> ways = new LinkedList<Long>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            statement = conn.prepareStatement("select ref as way_ref from relation_member where relation_ref=? and type='way'");
+            statement.setLong(1, relation);
+
+            rs = statement.executeQuery();
+            while (rs.next()){
+                ways.add(rs.getLong("way_ref"));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return ways;
+    }
+
+    public List<Long> getRelationsOfRelation(long relation){
+        List<Long> relations = new LinkedList<Long>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            statement = conn.prepareStatement("select ref as relation_ref from relation_member where relation_ref=? and type='relation'");
+            statement.setLong(1, relation);
+
+            rs = statement.executeQuery();
+            while (rs.next()){
+                relations.add(rs.getLong("relation_ref"));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return relations;
+    }
 }
