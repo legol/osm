@@ -250,4 +250,50 @@ public class PostgresqlAdapter {
 
         return relations;
     }
+
+    public List<Pair<String, String>> getTags(String tagType, long id){
+        List<Pair<String, String>> tags = new LinkedList<Pair<String, String>>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            if (tagType.compareToIgnoreCase("node") == 0){
+                statement = conn.prepareStatement("select k, v from node_tag where nd_ref=?");
+            }
+            else if (tagType.compareToIgnoreCase("way") == 0){
+                statement = conn.prepareStatement("select k, v from way_tag where way_ref=?");
+            }
+            else if (tagType.compareToIgnoreCase("relation") == 0){
+                statement = conn.prepareStatement("select k, v from relation_ref where relation_ref=?");
+            }
+            else{
+                LOGGER.error("unknown tag type:" + tagType);
+                return null;
+            }
+
+            statement.setLong(1, id);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                tags.add(new Pair<String, String>(rs.getString("k"), rs.getString("v")));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return tags;
+    }
 }

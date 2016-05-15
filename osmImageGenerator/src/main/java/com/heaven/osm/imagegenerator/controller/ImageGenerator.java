@@ -74,7 +74,7 @@ public class ImageGenerator {
 
         ByteArrayOutputStream jpegOutputStream = null;
         try {
-            BufferedImage bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_4BYTE_ABGR);
+            BufferedImage bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_3BYTE_BGR);
             Graphics2D g = bufferedImage.createGraphics();
 
             OSMDrawer.sharedInstance().drawOSM(generateImageRequest.boundingBox,
