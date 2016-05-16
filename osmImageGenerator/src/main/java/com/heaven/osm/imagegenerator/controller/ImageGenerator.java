@@ -74,11 +74,17 @@ public class ImageGenerator {
 
         ByteArrayOutputStream jpegOutputStream = null;
         try {
-            BufferedImage bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_3BYTE_BGR);
+            // keep the scale
+            double deltaLon = generateImageRequest.boundingBox.maxlon - generateImageRequest.boundingBox.minlon;
+            double deltaLat = generateImageRequest.boundingBox.maxlat - generateImageRequest.boundingBox.minlat;
+            int newHeight = (int)(deltaLat * generateImageRequest.imageWidth / deltaLon);
+
+            BufferedImage bufferedImage = new BufferedImage(generateImageRequest.imageWidth, newHeight, BufferedImage.TYPE_3BYTE_BGR);
             Graphics2D g = bufferedImage.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             OSMDrawer.sharedInstance().drawOSM(generateImageRequest.boundingBox,
-                    generateImageRequest.imageWidth, generateImageRequest.imageHeight,
+                    generateImageRequest.imageWidth, newHeight,
                     g);
 
             jpegOutputStream = new ByteArrayOutputStream();
