@@ -31,6 +31,7 @@ public class OSMDrawer {
         for (int i = -5; i <= 5; i++){
             HashMap<String, LinkedList<GraphicsLayerElement>> layers = new HashMap<String, LinkedList<GraphicsLayerElement>>();
             layers.put("layer_land", new LinkedList<GraphicsLayerElement>());
+            layers.put("layer_natural", new LinkedList<GraphicsLayerElement>());
             layers.put("layer_building", new LinkedList<GraphicsLayerElement>());
             layers.put("layer_water", new LinkedList<GraphicsLayerElement>());
             layers.put("layer_highway", new LinkedList<GraphicsLayerElement>());
@@ -75,6 +76,13 @@ public class OSMDrawer {
                         g);
             }
 
+            elements = layers.get("layer_natural");
+            for (int i = 0; i < elements.size(); i++){
+                drawNatural(elements.get(i).points, elements.get(i).tags,
+                            boundingBox, imageWidth, imageHeight,
+                            g);
+            }
+
             elements = layers.get("layer_building");
             for (int i = 0; i < elements.size(); i++){
                 drawBuilding(elements.get(i).points, elements.get(i).tags,
@@ -117,12 +125,12 @@ public class OSMDrawer {
                         g);
             }
 
-            elements = layers.get("layer_tag");
-            for (int i = 0; i < elements.size(); i++){
-                drawTags(elements.get(i).points, elements.get(i).tags,
-                        boundingBox, imageWidth, imageHeight,
-                        g);
-            }
+//            elements = layers.get("layer_tag");
+//            for (int i = 0; i < elements.size(); i++){
+//                drawTags(elements.get(i).points, elements.get(i).tags,
+//                        boundingBox, imageWidth, imageHeight,
+//                        g);
+//            }
 
             elements = layers.get("layer_boundary");
             for (int i = 0; i < elements.size(); i++){
@@ -150,6 +158,9 @@ public class OSMDrawer {
     }
     public boolean isLand(List<Pair<String, String>> tags){
         return isTag(tags, "landuse");
+    }
+    public boolean isNatural(List<Pair<String, String>> tags){
+        return isTag(tags, "natural");
     }
     public boolean isHighway(List<Pair<String, String>> tags){
         return isTag(tags, "highway");
@@ -221,6 +232,9 @@ public class OSMDrawer {
             layers.get("layer_water").add(element);
             layers.get("layer_tag").add(element);
         }
+        else if (isNatural(tags)){
+            layers.get("layer_natural").add(element);
+        }
         else if (isHighway(tags)) {
             String highwayValue = tagValue(tags, "highway");
 
@@ -286,6 +300,12 @@ public class OSMDrawer {
             innerStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(246, 250, 190);
         }
+        else if (highwayValue.compareToIgnoreCase("cycleway") == 0 || highwayValue.compareToIgnoreCase("footway") == 0){
+            edgeStroke = null;
+            edgeClr = null;
+            innerStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 0, new float[]{9}, 0);
+            innerClr = new Color(123, 121, 247);
+        }
         else{
             edgeStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(173, 173, 173);
@@ -293,16 +313,18 @@ public class OSMDrawer {
             innerClr =  new Color(254, 254, 254);
         }
 
-        g1.setStroke(edgeStroke);
-        g1.setColor(edgeClr);
+        if (edgeStroke != null && edgeClr != null){
+            g1.setStroke(edgeStroke);
+            g1.setColor(edgeClr);
 
-        double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
-        double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
-        for (int i = 0; i + 1 < points.size(); i++){
-            GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-            GraphicsPoint p2 = GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
+            double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
+            double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
+            for (int i = 0; i + 1 < points.size(); i++){
+                GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+                GraphicsPoint p2 = GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
 
-            g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+                g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+            }
         }
 
         g1.setStroke(innerStroke);
@@ -488,18 +510,31 @@ public class OSMDrawer {
 
         Graphics2D g1 = (Graphics2D) g.create();
 
-        BasicStroke wideStroke = new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-        g1.setStroke(wideStroke);
         g1.setColor(new Color(181, 208, 208));
 
-        double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
-        double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
+        String waterValue = tagValue(tags, "waterway");
+        if (waterValue != null && waterValue.compareToIgnoreCase("riverbank") == 0){
+            Polygon p=new Polygon();
 
-        for (int i = 0; i + 1 < points.size(); i++){
-            GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-            GraphicsPoint p2 = GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
+            for (int i = 0; i < points.size(); i++){
+                GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+                p.addPoint(p1.x, p1.y);
+            }
 
-            g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+            g1.fillPolygon(p);
+        }else{
+            BasicStroke wideStroke = new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            g1.setStroke(wideStroke);
+
+            double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
+            double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
+
+            for (int i = 0; i + 1 < points.size(); i++){
+                GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+                GraphicsPoint p2 = GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
+
+                g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+            }
         }
     }
 
@@ -526,12 +561,44 @@ public class OSMDrawer {
             g1.setColor(new Color(97, 240, 19)); // green
         }else if (isAmenity(tags)){
             g1.setColor(new Color(246, 249, 190)); // light green
-        } else{
-            g1.setColor(new Color(224, 222, 222)); // grey
+        } else {
+            String landValue = tagValue(tags, "landuse");
+            if (landValue != null &&
+                    (landValue.compareToIgnoreCase("basin") == 0 || landValue.compareToIgnoreCase("reservoir") == 0)){
+                g1.setColor(new Color(181, 208, 208)); // must be same with waterway
+            } else {
+                g1.setColor(new Color(224, 222, 222)); // grey
+            }
         }
 
         g1.fillPolygon(p);
     }
+
+    public void drawNatural(List<GeomPoint> points, List<Pair<String, String>> tags,
+                            GeomBox boundingBox, int imageWidth, int imageHeight,
+                            Graphics2D g){
+        Graphics2D g1 = (Graphics2D)g.create();
+
+        double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
+        double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
+
+        Polygon p=new Polygon();
+
+        for (int i = 0; i < points.size(); i++){
+            GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+            p.addPoint(p1.x, p1.y);
+        }
+
+        String naturalValue = tagValue(tags, "natural");
+        if (naturalValue != null && naturalValue.compareToIgnoreCase("water") == 0){
+            g1.setColor(new Color(181, 208, 208)); // must be same with waterway
+        } else {
+            g1.setColor(new Color(199, 228, 182));
+        }
+
+        g1.fillPolygon(p);
+    }
+
 
     public void drawTags(List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
@@ -539,17 +606,41 @@ public class OSMDrawer {
 
         Graphics2D g1 = (Graphics2D)g.create();
 
-        g1.setColor(Color.black);
-        for (int i = 0; i < tags.size(); i++){
-            if(tags.get(i).getKey().compareToIgnoreCase("name") == 0){
-                GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
+        String str = tagValue(tags, "name");
+        if (str == null){
+            str = "";
+        }
 
-                if (p1.x > imageWidth || p1.y > imageHeight || p1.x < 0 || p1.y < 0){
-                    break;
-                }
+        g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-                g1.drawString(tags.get(i).getValue(), p1.x, p1.y);
+        if (isLand(tags)){
+            // find the center point of the land
+            GraphicsPoint pCenter = new GraphicsPoint();
+            pCenter.x = 0;
+            pCenter.y = 0;
+            for (int i = 0; i < points.size(); i++){
+                GraphicsPoint p = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+
+                pCenter.x += p.x;
+                pCenter.y += p.y;
             }
+            pCenter.x /= points.size();
+            pCenter.y /= points.size();
+
+            int strWidth = g.getFontMetrics().stringWidth(str);
+            int strHeight = g.getFontMetrics().getHeight();
+
+            g1.setColor(Color.white);
+            g1.drawString(str, pCenter.x - strWidth / 2 + 2, pCenter.y + 2);
+
+            g1.setColor(Color.black);
+            g1.drawString(str, pCenter.x - strWidth / 2, pCenter.y);
+        }
+        else{
+            g1.setColor(Color.black);
+
+            GraphicsPoint p = GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
+            g1.drawString(str, p.x, p.y);
         }
     }
 }
