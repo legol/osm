@@ -8,6 +8,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.*;
 import java.util.List;
 
@@ -125,12 +126,12 @@ public class OSMDrawer {
                         g);
             }
 
-//            elements = layers.get("layer_tag");
-//            for (int i = 0; i < elements.size(); i++){
-//                drawTags(elements.get(i).points, elements.get(i).tags,
-//                        boundingBox, imageWidth, imageHeight,
-//                        g);
-//            }
+            elements = layers.get("layer_tag");
+            for (int i = 0; i < elements.size(); i++){
+                drawTags(elements.get(i).points, elements.get(i).tags,
+                        boundingBox, imageWidth, imageHeight,
+                        g);
+            }
 
             elements = layers.get("layer_boundary");
             for (int i = 0; i < elements.size(); i++){
@@ -244,10 +245,10 @@ public class OSMDrawer {
                     highwayValue.compareToIgnoreCase("secondary_link") == 0 ||
                     highwayValue.compareToIgnoreCase("tertiary_link") == 0){
                 layers.get("layer_highway_link").add(element);
-//                layers.get("layer_tag").add(element);
             }
             else{
                 layers.get("layer_highway").add(element);
+                layers.get("layer_tag").add(element);
             }
 
         }
@@ -606,41 +607,67 @@ public class OSMDrawer {
 
         Graphics2D g1 = (Graphics2D)g.create();
 
-        String str = tagValue(tags, "name");
-        if (str == null){
-            str = "";
+        String name = tagValue(tags, "name");
+        if (name == null){
+            name = "";
         }
 
         g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        if (isLand(tags)){
-            // find the center point of the land
-            GraphicsPoint pCenter = new GraphicsPoint();
-            pCenter.x = 0;
-            pCenter.y = 0;
-            for (int i = 0; i < points.size(); i++){
-                GraphicsPoint p = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+//        if (isLand(tags)){
+//            // find the center point of the land
+//            GraphicsPoint pCenter = new GraphicsPoint();
+//            pCenter.x = 0;
+//            pCenter.y = 0;
+//            for (int i = 0; i < points.size(); i++){
+//                GraphicsPoint p = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+//
+//                pCenter.x += p.x;
+//                pCenter.y += p.y;
+//            }
+//            pCenter.x /= points.size();
+//            pCenter.y /= points.size();
+//
+//            int strWidth = g.getFontMetrics().stringWidth(str);
+//            int strHeight = g.getFontMetrics().getHeight();
+//
+//            g1.setColor(Color.white);
+//            g1.drawString(str, pCenter.x - strWidth / 2 + 2, pCenter.y + 2);
+//
+//            g1.setColor(Color.black);
+//            g1.drawString(str, pCenter.x - strWidth / 2, pCenter.y);
+//        }
 
-                pCenter.x += p.x;
-                pCenter.y += p.y;
+        if (isWater(tags)){
+            g1.setColor(Color.black);
+
+            for (int i = 0; i + 1 < points.size(); i++){
+                GraphicsPoint p0 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+                GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
+
+                AffineTransform at = new AffineTransform();
+                at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+                g1.setTransform(at);
+                g1.drawString(name, p0.x, p0.y);
             }
-            pCenter.x /= points.size();
-            pCenter.y /= points.size();
-
-            int strWidth = g.getFontMetrics().stringWidth(str);
-            int strHeight = g.getFontMetrics().getHeight();
-
-            g1.setColor(Color.white);
-            g1.drawString(str, pCenter.x - strWidth / 2 + 2, pCenter.y + 2);
-
-            g1.setColor(Color.black);
-            g1.drawString(str, pCenter.x - strWidth / 2, pCenter.y);
-        }
-        else{
+        }else if (isHighway(tags)){
             g1.setColor(Color.black);
 
-            GraphicsPoint p = GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-            g1.drawString(str, p.x, p.y);
+            for (int i = 0; i + 1 < points.size(); i++){
+                GraphicsPoint p0 = GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+                GraphicsPoint p1 = GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
+
+                AffineTransform at = new AffineTransform();
+                at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+                g1.setTransform(at);
+                g1.drawString(name, p0.x, p0.y);
+            }
         }
+//        else{
+//            g1.setColor(Color.black);
+//
+//            GraphicsPoint p = GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
+//            g1.drawString(name, p.x, p.y);
+//        }
     }
 }
