@@ -55,6 +55,7 @@ public class PostgresqlAdapter {
         return instance;
     }
 
+    // not used
     public List<Long> getTopLevelRelationsByBoundingBox(GeomBox boundingBox){
 
         List<Long> relations = new LinkedList<Long>();
@@ -196,6 +197,7 @@ public class PostgresqlAdapter {
         return points;
     }
 
+    // not used
     public List<Long> getWaysOfRelation(long relation){
         List<Long> ways = new LinkedList<Long>();
 
@@ -230,6 +232,7 @@ public class PostgresqlAdapter {
         return ways;
     }
 
+    // not used
     public List<Long> getRelationsOfRelation(long relation){
         List<Long> relations = new LinkedList<Long>();
 
