@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +30,8 @@ public class TagDrawer {
     private static TagDrawer instance = null;
 
     private List<DrawnString> drawnStrings = new LinkedList<DrawnString>();
+    private final double tagDrawingHighwayInterval = 200;
+    private final double tagDrawingWaterwayInterval = 400;
 
     public boolean intersectsWithOthers(DrawnString drawnString){
 
@@ -120,12 +121,28 @@ public class TagDrawer {
         g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g1.setColor(Color.blue);
 
+        GraphicsPoint previousDrawingPoint = null;
         for (int i = 0; i + 1 < points.size(); i++){
             GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
             GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
 
+            // check if current drawing position is far enough away from previous same tag.
+            if (previousDrawingPoint != null){
+                double distance = Math.sqrt((p0.x - previousDrawingPoint.x) * (p0.x - previousDrawingPoint.x) + (p0.y - previousDrawingPoint.y) * (p0.y - previousDrawingPoint.y));
+                if (distance < tagDrawingWaterwayInterval){
+                    LOGGER.info(String.format("%s is too near from the previous same tag, skip drawing.", name));
+                    continue;
+                }
+            }
+
+            // make sure the tag won't be drawn upside down
             AffineTransform at = new AffineTransform();
-            at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+            if (p0.x > p1.x){
+                at.setToRotation(p0.x - p1.x, p0.y - p1.y, p0.x, p0.y);
+            }
+            else {
+                at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+            }
 
             int strWidth = g1.getFontMetrics().stringWidth(name);
             int strHeight = g1.getFontMetrics().getHeight();
@@ -147,6 +164,7 @@ public class TagDrawer {
             g1.drawString(name, p0.x, p0.y);
 
             drawnStrings.add(drawnString);
+            previousDrawingPoint = p0;
         }
     }
 
@@ -174,12 +192,28 @@ public class TagDrawer {
         g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g1.setColor(Color.black);
 
+        GraphicsPoint previousDrawingPoint = null;
         for (int i = 0; i + 1 < points.size(); i++){
             GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
             GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
 
+            // check if current drawing position is far enough away from previous same tag.
+            if (previousDrawingPoint != null){
+                double distance = Math.sqrt((p0.x - previousDrawingPoint.x) * (p0.x - previousDrawingPoint.x) + (p0.y - previousDrawingPoint.y) * (p0.y - previousDrawingPoint.y));
+                if (distance < tagDrawingHighwayInterval){
+                    LOGGER.info(String.format("%s is too near from the previous same tag, skip drawing.", name));
+                    continue;
+                }
+            }
+
+            // make sure the tag won't be drawn upside down
             AffineTransform at = new AffineTransform();
-            at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+            if (p0.x > p1.x){
+                at.setToRotation(p0.x - p1.x, p0.y - p1.y, p0.x, p0.y);
+            }
+            else {
+                at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+            }
 
             int strWidth = g1.getFontMetrics().stringWidth(name);
             int strHeight = g1.getFontMetrics().getHeight();
@@ -201,6 +235,8 @@ public class TagDrawer {
             g1.drawString(name, p0.x, p0.y);
 
             drawnStrings.add(drawnString);
+
+            previousDrawingPoint = p0;
         }
     }
 
