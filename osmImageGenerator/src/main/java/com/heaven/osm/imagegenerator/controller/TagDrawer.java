@@ -252,7 +252,7 @@ public class TagDrawer {
             return;
         }
 
-        if (OSMUtils.sharedInstance().isLand(tags)){
+        if (OSMUtils.sharedInstance().isLand(tags) || OSMUtils.sharedInstance().isAmenity(tags)){
             drawLandTag(tags, points, boundingBox, imageWidth, imageHeight, g1);
         }
         else if (OSMUtils.sharedInstance().isWaterway(tags)){
