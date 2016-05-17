@@ -137,7 +137,7 @@ public class OSMDrawer {
 
         // after drawing the graphics elements, the tags are drawn.
         for (int layerIdx = 0; layerIdx < allLayers.size(); layerIdx++) {
-            HashMap<String, LinkedList<GraphicsLayerElement>> layers = allLayers.get(layerIdx);
+            HashMap<String, LinkedList<GraphicsLayerElement>> layers = allLayers.get(allLayers.size() - 1 - layerIdx);
             List<GraphicsLayerElement> elements;
 
             elements = layers.get("layer_tag");
@@ -148,7 +148,6 @@ public class OSMDrawer {
                         tagDrawer);
             }
         }
-
     }
 
 
@@ -178,7 +177,7 @@ public class OSMDrawer {
 
             layers.get("layer_tag").add(element);
         }
-        else if (OSMUtils.sharedInstance().isWater(tags)){
+        else if (OSMUtils.sharedInstance().isWaterway(tags)){
             layers.get("layer_water").add(element);
             layers.get("layer_tag").add(element);
         }
@@ -447,11 +446,11 @@ public class OSMDrawer {
             p.addPoint(p1.x, p1.y);
         }
 
-        g1.setColor(Color.black);
-        g1.draw(p);
-
         g1.setColor(new Color(216, 208, 197));
         g1.fillPolygon(p);
+
+        g1.setColor(new Color(198, 186, 177));
+        g1.draw(p);
     }
 
     public void drawWater(List<GeomPoint> points, List<Pair<String, String>> tags,
@@ -503,10 +502,6 @@ public class OSMDrawer {
             p.addPoint(p1.x, p1.y);
         }
 
-        Stroke landEdge = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-        g1.setColor(new Color(180, 180, 178));
-        g1.draw(p);
-
         if (OSMUtils.sharedInstance().isLeisure(tags)){
             g1.setColor(new Color(97, 240, 19)); // green
         }else if (OSMUtils.sharedInstance().isAmenity(tags)){
@@ -520,8 +515,11 @@ public class OSMDrawer {
                 g1.setColor(new Color(224, 222, 222)); // grey
             }
         }
-
         g1.fillPolygon(p);
+
+        Stroke landEdge = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+        g1.setColor(new Color(180, 180, 178));
+        g1.draw(p);
     }
 
     public void drawNatural(List<GeomPoint> points, List<Pair<String, String>> tags,

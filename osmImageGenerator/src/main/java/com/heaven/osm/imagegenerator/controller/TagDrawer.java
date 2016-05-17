@@ -105,6 +105,51 @@ public class TagDrawer {
         drawnStrings.add(drawnString);
     }
 
+    public void drawWaterwayTag(List<Pair<String, String>> tags, List<GeomPoint> points,
+                                GeomBox boundingBox, int imageWidth, int imageHeight,
+                                Graphics2D g){
+        Graphics2D g1 = (Graphics2D)g.create();
+
+        String name = OSMUtils.sharedInstance().tagValue(tags, "name");
+        if (name == null){
+            return;
+        }
+
+        Rectangle imageRect = new Rectangle(0, 0, imageWidth, imageHeight);
+
+        g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        g1.setColor(Color.blue);
+
+        for (int i = 0; i + 1 < points.size(); i++){
+            GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
+
+            AffineTransform at = new AffineTransform();
+            at.setToRotation(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
+
+            int strWidth = g1.getFontMetrics().stringWidth(name);
+            int strHeight = g1.getFontMetrics().getHeight();
+
+            DrawnString drawnString = new DrawnString();
+            drawnString.str = name;
+            drawnString.transform = at;
+            drawnString.rect.x = p0.x;
+            drawnString.rect.y = p0.y;
+            drawnString.rect.width = strWidth;
+            drawnString.rect.height = strHeight;
+
+            if (!imageRect.intersects(drawnString.rect) || intersectsWithOthers(drawnString)){
+                LOGGER.info(String.format("%s intersects with other tags, skip drawing.", name));
+                continue;
+            }
+
+            g1.setTransform(at);
+            g1.drawString(name, p0.x, p0.y);
+
+            drawnStrings.add(drawnString);
+        }
+    }
+
     public void drawHighwayTag(List<Pair<String, String>> tags, List<GeomPoint> points,
                                GeomBox boundingBox, int imageWidth, int imageHeight,
                                Graphics2D g){
@@ -112,6 +157,15 @@ public class TagDrawer {
 
         String name = OSMUtils.sharedInstance().tagValue(tags, "name");
         if (name == null){
+            return;
+        }
+
+        String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
+        if (highwayValue != null && !(highwayValue.compareToIgnoreCase("motorway") == 0 ||
+                highwayValue.compareToIgnoreCase("trunk") == 0 ||
+                highwayValue.compareToIgnoreCase("primary") == 0 ||
+                highwayValue.compareToIgnoreCase("secondary") == 0 ||
+                highwayValue.compareToIgnoreCase("tertiary") == 0)){
             return;
         }
 
@@ -165,7 +219,10 @@ public class TagDrawer {
         if (OSMUtils.sharedInstance().isLand(tags)){
             drawLandTag(tags, points, boundingBox, imageWidth, imageHeight, g1);
         }
-        else if (OSMUtils.sharedInstance().isWater(tags) || OSMUtils.sharedInstance().isHighway(tags)){
+        else if (OSMUtils.sharedInstance().isWaterway(tags)){
+            drawWaterwayTag(tags, points, boundingBox, imageWidth, imageHeight, g1);
+        }
+        else if (OSMUtils.sharedInstance().isHighway(tags)){
             drawHighwayTag(tags, points, boundingBox, imageWidth, imageHeight, g1);
         }
     }

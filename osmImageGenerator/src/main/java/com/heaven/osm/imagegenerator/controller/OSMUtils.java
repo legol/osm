@@ -46,7 +46,7 @@ public class OSMUtils {
     public boolean isHighway(List<Pair<String, String>> tags){
         return isTag(tags, "highway");
     }
-    public boolean isWater(List<Pair<String, String>> tags){
+    public boolean isWaterway(List<Pair<String, String>> tags){
         return isTag(tags, "waterway");
     }
     public boolean isLeisure(List<Pair<String, String>> tags){
