@@ -1,10 +1,7 @@
 package com.heaven.osm.imagegenerator.controller;
 
 import com.heaven.osm.imagegenerator.model.*;
-import com.sun.corba.se.impl.orbutil.graph.Graph;
-import javafx.geometry.Pos;
 import javafx.util.Pair;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
@@ -53,6 +50,7 @@ public class OSMDrawer {
                     allLayers);
         }
 
+        // real drawing goes here
         drawLayers(allLayers, boundingBox, imageWidth, imageHeight, g);
     }
 
@@ -126,16 +124,22 @@ public class OSMDrawer {
                         g);
             }
 
-            elements = layers.get("layer_tag");
-            for (int i = 0; i < elements.size(); i++){
-                drawTags(elements.get(i).points, elements.get(i).tags,
-                        boundingBox, imageWidth, imageHeight,
-                        g);
-            }
-
             elements = layers.get("layer_boundary");
             for (int i = 0; i < elements.size(); i++){
                 drawBoundary(elements.get(i).points, elements.get(i).tags,
+                        boundingBox, imageWidth, imageHeight,
+                        g);
+            }
+        }
+
+        // after drawing the graphics elements, the tags are drawn.
+        for (int layerIdx = 0; layerIdx < allLayers.size(); layerIdx++) {
+            HashMap<String, LinkedList<GraphicsLayerElement>> layers = allLayers.get(layerIdx);
+            List<GraphicsLayerElement> elements;
+
+            elements = layers.get("layer_tag");
+            for (int i = 0; i < elements.size(); i++) {
+                drawTags(elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g);
             }
