@@ -398,7 +398,7 @@ public class OSMDrawer {
                                 Graphics2D g){
         Graphics2D g1 = (Graphics2D) g.create();
 
-        Stroke dashed = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 21.0f, 9.0f, 3.0f, 9.0f }, 0);
+        Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 21.0f, 9.0f, 3.0f, 9.0f }, 0);
         g1.setStroke(dashed);
         g1.setColor(new Color(206, 154, 202));
 
