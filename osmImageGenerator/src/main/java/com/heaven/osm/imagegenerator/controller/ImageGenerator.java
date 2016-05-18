@@ -78,7 +78,7 @@ public class ImageGenerator {
             Graphics2D g = bufferedImage.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            OSMDrawer.sharedInstance().drawOSM(generateImageRequest.boundingBox, generateImageRequest.lod,
+            OSMDrawer.sharedInstance().drawOSM(generateImageRequest.boundingBox,
                     generateImageRequest.imageWidth, generateImageRequest.imageHeight,
                     g);
 

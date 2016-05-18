@@ -18,7 +18,4 @@ public class GenerateImageRequest {
 
     @JsonProperty("image_height")
     public int imageHeight;
-
-    @JsonProperty("lod")
-    public int lod;
 }

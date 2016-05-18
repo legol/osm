@@ -23,12 +23,7 @@ public class OSMDrawer {
         return instance;
     }
 
-    public void drawOSM(GeomBox boundingBox, int lod, int imageWidth, int imageHeight, Graphics2D g){
-
-        // 1, 5, 10, 15, 20, 25, .... the bigger the lod is, the less detail.
-        if (lod != 1){
-            lod = (int)(lod / 5) * 5;
-        }
+    public void drawOSM(GeomBox boundingBox, int imageWidth, int imageHeight, Graphics2D g){
 
         LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers = new LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>>();
         for (int i = -5; i <= 5; i++){
@@ -47,12 +42,12 @@ public class OSMDrawer {
             allLayers.add(layers);
         }
 
-        List<Long> ways = PostgresqlAdapter.sharedInstance().getWaysByBoundingBox(boundingBox, lod);
+        List<Long> ways = PostgresqlAdapter.sharedInstance().getWaysByBoundingBox(boundingBox);
         for (int i = 0; i < ways.size(); i++){
             drawWay(ways.get(i).longValue(),
                     boundingBox, imageWidth, imageHeight,
                     g,
-                    allLayers, lod);
+                    allLayers);
         }
 
         // real drawing goes here
@@ -159,10 +154,9 @@ public class OSMDrawer {
     public void drawWay(long way,
                         GeomBox boundingBox, int imageWidth, int imageHeight,
                         Graphics2D g,
-                        LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers,
-                        int lod){
-        List<GeomPoint> points = PostgresqlAdapter.sharedInstance().getPointsOfWay(way, lod);
-        List<Pair<String, String>> tags = PostgresqlAdapter.sharedInstance().getTags("way", way, lod);
+                        LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers){
+        List<GeomPoint> points = PostgresqlAdapter.sharedInstance().getPointsOfWay(way);
+        List<Pair<String, String>> tags = PostgresqlAdapter.sharedInstance().getTags("way", way);
 
         String layerTagValue = OSMUtils.sharedInstance().tagValue(tags, "layer");
         int layerIdx = layerTagValue == null ? 0 : Integer.parseInt(layerTagValue) + 5; // layer is between -5..5. see http://wiki.openstreetmap.org/wiki/Map_Features#Highway

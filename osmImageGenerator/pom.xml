@@ -18,7 +18,7 @@
           <properties>
               <log.dir>C:/Projects/osm/logs</log.dir>
               <log.file>osmParser.log</log.file>
-              <postgresql.jdbcUrl>jdbc:postgresql://192.168.91.129:5432/osm</postgresql.jdbcUrl>
+              <postgresql.jdbcUrl>jdbc:postgresql://192.168.95.129:5432/osm</postgresql.jdbcUrl>
               <postgresql.user>postgres</postgresql.user>
               <postgresql.password>CjTm803048</postgresql.password>
           </properties>

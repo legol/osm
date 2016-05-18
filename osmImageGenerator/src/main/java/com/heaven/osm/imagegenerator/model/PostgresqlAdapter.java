@@ -95,7 +95,7 @@ public class PostgresqlAdapter {
         return relations;
     }
 
-    public List<Long> getWaysByBoundingBox(GeomBox boundingBox, int lod){
+    public List<Long> getWaysByBoundingBox(GeomBox boundingBox){
 
         List<Long> ways = new LinkedList<Long>();
 
@@ -106,12 +106,7 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            String tableSuffix = "";
-            if (lod != 1){
-                tableSuffix = String.format("%d", lod);
-            }
-
-            statement = conn.prepareStatement("select way_ref from way_bounding_box" + tableSuffix + " where not(? < minlat or ? < minlon or maxlat < ? or maxlon < ?)");
+            statement = conn.prepareStatement("select way_ref from way_bounding_box where not(? < minlat or ? < minlon or maxlat < ? or maxlon < ?)");
 
             statement.setDouble(1, boundingBox.maxlat);
             statement.setDouble(2, boundingBox.maxlon);
@@ -139,7 +134,7 @@ public class PostgresqlAdapter {
         return ways;
     }
 
-    public List<GeomPoint> getPointsOfWay(long way, int lod){
+    public List<GeomPoint> getPointsOfWay(long way){
         List<GeomPoint> points = new LinkedList<GeomPoint>();
 
         Connection conn = null;
@@ -149,16 +144,9 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            String tableNd = "node";
-            String tableWayNd = "way_nd";
-            if (lod != 1){
-                tableNd = String.format("%s%d", tableNd, lod);
-                tableWayNd = String.format("%s%d", tableWayNd, lod);
-            }
-
-            statement = conn.prepareStatement("select ST_AsGeoJson(wgs84long_lat) as point_json from " + tableNd +" right join (select nd_ref from " + tableWayNd + " where way_ref=?) as way_nodes " +
+            statement = conn.prepareStatement("select ST_AsGeoJson(wgs84long_lat) as point_json from node right join (select nd_ref from way_nd where way_ref=?) as way_nodes " +
                     "on " +
-                    tableNd + ".id=way_nodes.nd_ref ");
+                    "node.id=way_nodes.nd_ref ");
             statement.setLong(1, way);
 
             rs = statement.executeQuery();
@@ -267,7 +255,7 @@ public class PostgresqlAdapter {
         return relations;
     }
 
-    public List<Pair<String, String>> getTags(String tagType, long id, int lod){
+    public List<Pair<String, String>> getTags(String tagType, long id){
         List<Pair<String, String>> tags = new LinkedList<Pair<String, String>>();
 
         Connection conn = null;
@@ -277,16 +265,11 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            String tableSuffix = "";
-            if (lod != 1){
-                tableSuffix = String.format("%d", lod);
-            }
-
             if (tagType.compareToIgnoreCase("node") == 0){
-                statement = conn.prepareStatement("select k, v from node_tag" + tableSuffix + " where nd_ref=?");
+                statement = conn.prepareStatement("select k, v from node_tag where nd_ref=?");
             }
             else if (tagType.compareToIgnoreCase("way") == 0){
-                statement = conn.prepareStatement("select k, v from way_tag" + tableSuffix + " where way_ref=?");
+                statement = conn.prepareStatement("select k, v from way_tag where way_ref=?");
             }
             else if (tagType.compareToIgnoreCase("relation") == 0){
                 statement = conn.prepareStatement("select k, v from relation_ref where relation_ref=?");
