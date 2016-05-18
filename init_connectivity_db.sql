@@ -17,5 +17,9 @@ CREATE INDEX "connectivity_nd_ref1" ON "connectivity"("nd_ref1");
 CREATE INDEX "connectivity_nd_ref2" ON "connectivity"("nd_ref2");
 
 
-run osmParser with command line: calc_connectivity
+run osmParser with command line: calc_connectivity, then
 
+
+
+alter table connectivity add column distance float(32);
+update connectivity set distance=st_distance_sphere(nd1_wgs84long_lat, nd2_wgs84long_lat); -- distance will be in meters

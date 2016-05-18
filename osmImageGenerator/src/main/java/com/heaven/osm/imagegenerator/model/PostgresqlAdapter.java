@@ -301,4 +301,42 @@ public class PostgresqlAdapter {
 
         return tags;
     }
+
+    public GeomPoint getPoint(long nodeRef){
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        GeomPoint point = new GeomPoint();
+        point.nodeId = nodeRef;
+
+        try {
+            conn = cpds.getConnection();
+
+            statement = conn.prepareStatement("select ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node where id=?");
+
+            statement.setLong(1, nodeRef);
+            rs = statement.executeQuery();
+            while (rs.next()){
+
+                point.longitude = rs.getDouble("lon");
+                point.latitude = rs.getDouble("lat");
+                break;
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return point;
+    }
 }
