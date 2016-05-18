@@ -1,8 +1,7 @@
-package com.heaven.osm.imagegenerator.controller;
+package com.heaven.osm.controller;
 
-import com.heaven.osm.imagegenerator.model.GeomBox;
-import com.heaven.osm.imagegenerator.model.GeomPoint;
-import com.heaven.osm.imagegenerator.model.GraphicsPoint;
+import com.heaven.osm.model.GeomBox;
+import com.heaven.osm.model.GeomPoint;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
@@ -21,15 +20,6 @@ public class OSMUtils {
             instance = new OSMUtils();
         }
         return instance;
-    }
-
-    public GraphicsPoint GeomPoint2GraphicsPoint(GeomPoint geomPoint, GeomBox boundingBox, int imageWidth, int imageHeight){
-        GraphicsPoint point = new GraphicsPoint();
-
-        point.x = (int)Math.round(imageWidth * (geomPoint.longitude - boundingBox.minlon) / (boundingBox.maxlon - boundingBox.minlon));
-        point.y = (int)Math.round(imageHeight - imageHeight * (geomPoint.latitude - boundingBox.minlat) / (boundingBox.maxlat - boundingBox.minlat));
-
-        return point;
     }
 
     public boolean isBuilding(List<Pair<String, String>> tags){

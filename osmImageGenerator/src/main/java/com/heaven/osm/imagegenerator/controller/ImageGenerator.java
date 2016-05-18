@@ -3,6 +3,7 @@ package com.heaven.osm.imagegenerator.controller;
 import com.heaven.osm.imagegenerator.model.GenerateImageRequest;
 import com.heaven.osm.imagegenerator.model.GeomBox;
 import com.heaven.osm.imagegenerator.model.PostgresqlAdapter;
+import javafx.scene.shape.Path;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,6 +82,11 @@ public class ImageGenerator {
             OSMDrawer.sharedInstance().drawOSM(generateImageRequest.boundingBox,
                     generateImageRequest.imageWidth, generateImageRequest.imageHeight,
                     g);
+
+            PathDrawer.sharedInstance().drawPath(generateImageRequest.boundingBox,
+                    generateImageRequest.imageWidth, generateImageRequest.imageHeight,
+                    g,
+                    381939072, 701015787);
 
             jpegOutputStream = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "jpeg", jpegOutputStream);

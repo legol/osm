@@ -11,4 +11,6 @@ import java.util.List;
 public class GraphicsLayerElement {
     public List<GeomPoint> points;
     public List<Pair<String, String>> tags;
+
+    public String debugInfo;
 }

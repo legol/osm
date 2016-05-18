@@ -39,6 +39,8 @@ public class OSMDrawer {
             layers.put("layer_tag", new LinkedList<GraphicsLayerElement>());
             layers.put("layer_boundary", new LinkedList<GraphicsLayerElement>());
 
+            layers.put("layer_debug", new LinkedList<GraphicsLayerElement>());
+
             allLayers.add(layers);
         }
 
@@ -148,8 +150,31 @@ public class OSMDrawer {
                         tagDrawer);
             }
         }
+
+        // draw debug info
+        for (int layerIdx = 0; layerIdx < allLayers.size(); layerIdx++) {
+            HashMap<String, LinkedList<GraphicsLayerElement>> layers = allLayers.get(allLayers.size() - 1 - layerIdx);
+            List<GraphicsLayerElement> elements;
+
+            elements = layers.get("layer_debug");
+            for (int i = 0; i < elements.size(); i++) {
+                drawDebugInfo(elements.get(i),
+                            boundingBox, imageWidth, imageHeight,
+                            g);
+            }
+        }
     }
 
+    public void drawDebugInfo(GraphicsLayerElement element,
+                                GeomBox boundingBox, int imageWidth, int imageHeight,
+                                Graphics2D g){
+        Graphics2D g1 = (Graphics2D)g.create();
+        g1.setColor(Color.red);
+
+        GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(element.points.get(0), boundingBox, imageWidth, imageHeight);
+
+        g1.drawString(element.debugInfo, p.x, p.y);
+    }
 
     public void drawWay(long way,
                         GeomBox boundingBox, int imageWidth, int imageHeight,
@@ -168,6 +193,7 @@ public class OSMDrawer {
         GraphicsLayerElement element = new GraphicsLayerElement();
         element.points = points;
         element.tags = tags;
+        element.debugInfo = String.format("ref:%d", way);
 
         if (OSMUtils.sharedInstance().isBuilding(tags)){
             layers.get("layer_building").add(element);
@@ -198,6 +224,7 @@ public class OSMDrawer {
                 layers.get("layer_tag").add(element);
             }
 
+            layers.get("layer_debug").add(element);
         }
         else if (OSMUtils.sharedInstance().isRail(tags)){
             layers.get("layer_rail").add(element);

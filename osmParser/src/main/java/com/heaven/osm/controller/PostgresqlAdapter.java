@@ -538,6 +538,39 @@ public class PostgresqlAdapter {
         return ways;
     }
 
+    public List<Long> getHighways(){
+        List<Long> ways = new LinkedList<Long>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            // 1. select all nodes that are on the ways of the relation.
+            statement = conn.prepareStatement("select distinct way_ref from way_tag where k='highway'");
+            rs = statement.executeQuery();
+            while (rs.next()){
+                ways.add(rs.getLong("way_ref"));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return ways;
+    }
+
     public List<GeomPoint> getPointsOfWay(long way_ref){
         List<GeomPoint> points = new LinkedList<GeomPoint>();
 
@@ -548,8 +581,8 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            // 1. select all nodes that are on the ways of the relation.
-            statement = conn.prepareStatement("select ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node " +
+            // select all nodes that are on the way.
+            statement = conn.prepareStatement("select id as nd_ref, ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node " +
                     "right join " +
                     "(select way_nd.nd_ref from way_nd where way_nd.way_ref=?) as nodes " +
                     "on node.id = nodes.nd_ref");
@@ -557,6 +590,7 @@ public class PostgresqlAdapter {
             rs = statement.executeQuery();
             while (rs.next()){
                 GeomPoint point = new GeomPoint();
+                point.nodeId = rs.getLong("nd_ref");
                 point.longitude = rs.getDouble("lon");
                 point.latitude = rs.getDouble("lat");
 
@@ -629,4 +663,105 @@ public class PostgresqlAdapter {
 
         return true;
     }
+
+    public boolean saveConnectivity(GeomPoint p1, GeomPoint p2, long way_ref){
+        Connection conn = null;
+        PreparedStatement statement = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            conn.setAutoCommit(false); // make sure the node and its tags are inserted in the same time.
+
+            // save bounding_box
+            statement = conn.prepareStatement("insert into connectivity(nd_ref1, nd_ref2, way_ref, nd1_wgs84long_lat, nd2_wgs84long_lat) values " +
+                    "(?, ?, ?, ST_SetSRID(ST_MakePoint(?, ?), 4326), ST_SetSRID(ST_MakePoint(?, ?), 4326))");
+
+            statement.setLong(1, p1.nodeId);
+            statement.setLong(2, p2.nodeId);
+            statement.setLong(3, way_ref);
+            statement.setDouble(4, p1.longitude);
+            statement.setDouble(5, p1.latitude);
+            statement.setDouble(6, p2.longitude);
+            statement.setDouble(7, p2.latitude);
+
+            int rowsAffacted = statement.executeUpdate();
+            if (rowsAffacted == 0) {
+                statement.close();
+                conn.close();
+                return false;
+            }
+            statement.close();
+
+            // save to db
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            statement.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                statement.close();
+                conn.close();
+
+                return false;
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public List<Pair<String, String>> getTags(String tagType, long id){
+        List<Pair<String, String>> tags = new LinkedList<Pair<String, String>>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            if (tagType.compareToIgnoreCase("node") == 0){
+                statement = conn.prepareStatement("select k, v from node_tag where nd_ref=?");
+            }
+            else if (tagType.compareToIgnoreCase("way") == 0){
+                statement = conn.prepareStatement("select k, v from way_tag where way_ref=?");
+            }
+            else if (tagType.compareToIgnoreCase("relation") == 0){
+                statement = conn.prepareStatement("select k, v from relation_ref where relation_ref=?");
+            }
+            else{
+                LOGGER.error("unknown tag type:" + tagType);
+                return null;
+            }
+
+            statement.setLong(1, id);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                tags.add(new Pair<String, String>(rs.getString("k"), rs.getString("v")));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return tags;
+    }
+
 }

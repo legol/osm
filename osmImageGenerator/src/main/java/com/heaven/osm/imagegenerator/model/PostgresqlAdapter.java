@@ -144,7 +144,7 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            statement = conn.prepareStatement("select ST_AsGeoJson(wgs84long_lat) as point_json from node right join (select nd_ref from way_nd where way_ref=?) as way_nodes " +
+            statement = conn.prepareStatement("select id as nd_ref, ST_AsGeoJson(wgs84long_lat) as point_json from node right join (select nd_ref from way_nd where way_ref=?) as way_nodes " +
                     "on " +
                     "node.id=way_nodes.nd_ref ");
             statement.setLong(1, way);
@@ -157,6 +157,7 @@ public class PostgresqlAdapter {
                 PostgisGeom parsedPoint = mapper.readValue(pointInJson, PostgisGeom.class);
 
                 GeomPoint newPoint = new GeomPoint();
+                newPoint.nodeId = rs.getLong("nd_ref");
                 newPoint.longitude = parsedPoint.coordinates[0];
                 newPoint.latitude = parsedPoint.coordinates[1];
 

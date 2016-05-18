@@ -1,6 +1,7 @@
 package com.heaven;
 
 import com.heaven.osm.controller.BoundingBoxCalculator;
+import com.heaven.osm.controller.ConnectivityCalculator;
 import com.heaven.osm.controller.OpenStreetMapParser;
 import com.heaven.osm.controller.PostgresqlAdapter;
 import com.heaven.osm.model.GeomPoint;
@@ -31,6 +32,11 @@ public class App
             // calc_bounding_box
             LOGGER.info("calculate bounding box... ");
             BoundingBoxCalculator calc = new BoundingBoxCalculator();
+            calc.run();
+        }
+        else if (args[0].compareToIgnoreCase("calc_connectivity") == 0){
+            LOGGER.info("calculate connectivity map...");
+            ConnectivityCalculator calc = new ConnectivityCalculator();
             calc.run();
         }
     }
