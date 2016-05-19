@@ -214,7 +214,7 @@ public class PostgresqlAdapter {
 
             // save way_nd
             if (way.nd.size() > 0) {
-                statement = conn.prepareStatement("INSERT INTO way_nd(way_ref, nd_ref, order) VALUES (?, ?, ?)");
+                statement = conn.prepareStatement("INSERT INTO way_nd(way_ref, nd_ref, \"order\") VALUES (?, ?, ?)");
 
                 for (int i = 0; i < way.nd.size(); i++){
                     long nd_ref = Long.parseLong(way.nd.get(i));
