@@ -86,7 +86,7 @@ public class ImageGenerator {
             PathDrawer.sharedInstance().drawPath(generateImageRequest.boundingBox,
                     generateImageRequest.imageWidth, generateImageRequest.imageHeight,
                     g,
-                    2498099904L, 2499303193L);
+                    701015788L, 3457584993L);
 
             jpegOutputStream = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "jpeg", jpegOutputStream);
