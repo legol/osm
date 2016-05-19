@@ -183,6 +183,14 @@ class OSMHandler extends DefaultHandler {
     }
 
     protected void saveWay(OSMWay way){
+        // the node order is reversed from what in the XML file. let's reverse it back.
+
+        List<String> ndReversed = new LinkedList<String>();
+        for (int i = 0; i < way.nd.size(); i++){
+            ndReversed.add(way.nd.get(way.nd.size() - 1 - i));
+        }
+        way.nd = ndReversed;
+
         PostgresqlAdapter.sharedInstance().saveWay(way);
     }
 

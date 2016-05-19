@@ -26,7 +26,7 @@ public class App
             // osm2pg C:\Projects\osm\testData\beijing-circle-6.osm
             LOGGER.info("parse " + args[1] + " and save it to postgreSQL.");
             OpenStreetMapParser parser = new OpenStreetMapParser();
-            parser.run(args[0]);
+            parser.run(args[1]);
         }
         else if(args[0].compareToIgnoreCase("calc_bounding_box") == 0){
             // calc_bounding_box

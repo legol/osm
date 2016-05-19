@@ -214,13 +214,14 @@ public class PostgresqlAdapter {
 
             // save way_nd
             if (way.nd.size() > 0) {
-                statement = conn.prepareStatement("INSERT INTO way_nd(way_ref, nd_ref) VALUES (?, ?)");
+                statement = conn.prepareStatement("INSERT INTO way_nd(way_ref, nd_ref, order) VALUES (?, ?, ?)");
 
                 for (int i = 0; i < way.nd.size(); i++){
                     long nd_ref = Long.parseLong(way.nd.get(i));
 
                     statement.setLong(1, id);
                     statement.setLong(2, nd_ref);
+                    statement.setLong(3, i);
 
                     rowsAffacted = statement.executeUpdate();
                     if (rowsAffacted == 0) {
