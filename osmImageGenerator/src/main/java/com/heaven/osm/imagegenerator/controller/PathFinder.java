@@ -316,24 +316,23 @@ public class PathFinder {
 
     public List<PathFinderResultPoint> constructPath(CameFrom cameFrom, long lastNodeRef, long firstNodeRef){
         List<PathFinderResultPoint> path = new LinkedList<PathFinderResultPoint>();
-        Deque<PathFinderResultPoint> pathReversed = new ConcurrentLinkedDeque<PathFinderResultPoint>();
+        List<PathFinderResultPoint> pathReversed = new LinkedList<PathFinderResultPoint>();
 
         long currentNodeRef = lastNodeRef;
 
         GeomPoint geomPoint = nodeInfoMap.getGeomInfo(currentNodeRef);
-        pathReversed.addFirst(new PathFinderResultPoint(geomPoint, 0));
+        pathReversed.add(new PathFinderResultPoint(geomPoint, 0));
         while (currentNodeRef != firstNodeRef){
 
             Pair<Long, Long> cameFromNodeAndWay = cameFrom.getCameFrom(currentNodeRef);
             currentNodeRef = cameFromNodeAndWay.getKey();
 
             geomPoint = nodeInfoMap.getGeomInfo(currentNodeRef);
-            pathReversed.addFirst(new PathFinderResultPoint(geomPoint, cameFromNodeAndWay.getValue()));
+            pathReversed.add(new PathFinderResultPoint(geomPoint, cameFromNodeAndWay.getValue()));
         }
 
-        Iterator<PathFinderResultPoint> itr = pathReversed.iterator();
-        while (itr.hasNext()){
-            path.add(itr.next());
+        for (int i = 0; i < pathReversed.size(); i++){
+            path.add(pathReversed.get(pathReversed.size() - 1 - i));
         }
 
         return path;

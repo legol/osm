@@ -585,7 +585,7 @@ public class PostgresqlAdapter {
             // select all nodes that are on the way.
             statement = conn.prepareStatement("select id as nd_ref, ST_X(node.wgs84long_lat) as lon, ST_Y(node.wgs84long_lat) as lat from node " +
                     "right join " +
-                    "(select way_nd.nd_ref from way_nd where way_nd.way_ref=?) as nodes " +
+                    "(select way_nd.nd_ref from way_nd where way_nd.way_ref=? order by \"order\" desc) as nodes " +
                     "on node.id = nodes.nd_ref");
             statement.setLong(1, way_ref);
             rs = statement.executeQuery();
