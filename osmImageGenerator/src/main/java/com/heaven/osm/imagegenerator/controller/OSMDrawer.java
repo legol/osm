@@ -193,7 +193,7 @@ public class OSMDrawer {
         GraphicsLayerElement element = new GraphicsLayerElement();
         element.points = points;
         element.tags = tags;
-        element.debugInfo = String.format("ref:%d", way);
+        element.debugInfo = String.format("%d", way);
 
         if (OSMUtils.sharedInstance().isBuilding(tags)){
             layers.get("layer_building").add(element);

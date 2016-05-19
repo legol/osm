@@ -16,9 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by chenjie3 on 2016/5/11.
@@ -339,4 +337,39 @@ public class PostgresqlAdapter {
 
         return point;
     }
+
+    public Set<Pair<Long, Long>> getNeighbors(long nodeRef){
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        Set<Pair<Long, Long>> neighbors = new HashSet<Pair<Long, Long>>();
+
+        try {
+            conn = cpds.getConnection();
+
+            statement = conn.prepareStatement("select nd_ref2, way_ref from connectivity where nd_ref1=?");
+
+            statement.setLong(1, nodeRef);
+            rs = statement.executeQuery();
+            while (rs.next()){
+                neighbors.add(new Pair<Long, Long>(rs.getLong("nd_ref2"), rs.getLong("way_ref")));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return neighbors;
+    }
+
 }

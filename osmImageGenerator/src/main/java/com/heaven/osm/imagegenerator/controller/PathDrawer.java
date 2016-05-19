@@ -1,11 +1,13 @@
 package com.heaven.osm.imagegenerator.controller;
 
 import com.heaven.osm.imagegenerator.model.GeomBox;
-import com.heaven.osm.imagegenerator.model.GeomPoint;
-import com.heaven.osm.imagegenerator.model.GeomPointOfWay;
+import com.heaven.osm.imagegenerator.model.GraphicsPoint;
+import com.heaven.osm.imagegenerator.model.PathFinderResultPoint;
+import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
+import java.util.Deque;
 import java.util.List;
 
 /**
@@ -25,7 +27,21 @@ public class PathDrawer {
 
     public void drawPath(GeomBox boundingBox, int imageWidth, int imageHeight, Graphics2D g,
                          long nodeFrom, long nodeTo) {
-        List<GeomPointOfWay> points = PathFinder.sharedInstance().searchPath(nodeFrom, nodeTo);
+        List<PathFinderResultPoint> points = PathFinder.sharedInstance().searchPath(nodeFrom, nodeTo);
 
+        Graphics2D g1 = (Graphics2D) g.create();
+        g1.setColor(Color.blue);
+
+        BasicStroke pathStroke = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+        g1.setStroke(pathStroke);
+
+        double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
+        double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
+        for (int i = 0; i + 1 < points.size(); i++){
+            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i).geoPoint, boundingBox, imageWidth, imageHeight);
+            GraphicsPoint p2 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i + 1).geoPoint, boundingBox, imageWidth, imageHeight);
+
+            g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+        }
     }
 }
