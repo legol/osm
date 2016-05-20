@@ -47,7 +47,7 @@ public class MainFrame extends JFrame {
         findPathButton.addActionListener(new FindPathAction(mapPanel));
 
         JButton findPathButtonSbS = new JButton("find path step by step");
-        findPathButtonSbS.setPreferredSize(new Dimension(100, 50));
+        findPathButtonSbS.setPreferredSize(new Dimension(180, 50));
         mainPanel.add(findPathButtonSbS);
         findPathButtonSbS.addActionListener(new FindPathSbSAction(mapPanel));
 

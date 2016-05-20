@@ -16,10 +16,10 @@ public class TestData {
         generateImageRequest.imageHeight = 1024;
         generateImageRequest.imageWidth = 1024;
         generateImageRequest.boundingBox = new GeomBox();
-        generateImageRequest.boundingBox.minlat = 40.0528;
-        generateImageRequest.boundingBox.maxlat = 40.0809;
-        generateImageRequest.boundingBox.minlon = 116.3042;
-        generateImageRequest.boundingBox.maxlon = 116.3446;
+        generateImageRequest.boundingBox.minlat = 40.0552;
+        generateImageRequest.boundingBox.maxlat = 40.0948;
+        generateImageRequest.boundingBox.minlon = 116.2882;
+        generateImageRequest.boundingBox.maxlon = 116.3526;
     }
 
     public static TestData sharedInstance() {

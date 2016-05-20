@@ -3,6 +3,7 @@ package com.heaven.osmPathFinder.osmcontroller;
 import com.heaven.osmPathFinder.osmmodel.GeomPoint;
 import com.heaven.osmPathFinder.osmmodel.PathFinderResultPoint;
 import com.heaven.osmPathFinder.osmmodel.PostgresqlAdapter;
+import javafx.scene.shape.Path;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
@@ -192,6 +193,72 @@ class CameFrom{
     }
 }
 
+// for observer
+class ObserverHelper{
+    public Set<PathFinderResultPoint> openSetForObserver = null;
+    public Set<PathFinderResultPoint> closedSetForObserver = null;
+
+    public PathFinder pathFinder = null;
+    public PathFinderObserver ob = null;
+
+    public ObserverHelper(PathFinder _pathFinder, PathFinderObserver _ob){
+        pathFinder = _pathFinder;
+        ob = _ob;
+    }
+
+    public void onProgress(Set<Long> openSet, Set<Long> closedSet){
+        if (ob != null){
+            if (openSetForObserver == null){
+                openSetForObserver = new HashSet<PathFinderResultPoint>();
+            }
+
+            if (closedSetForObserver == null){
+                closedSetForObserver = new HashSet<PathFinderResultPoint>();
+            }
+
+            for (long nodeRef : openSet){
+                PathFinderPoint point = pathFinder.nodeInfoMap.getPoint(nodeRef);
+                PathFinderResultPoint resultPoint = new PathFinderResultPoint(point.geoPoint, 0);
+                openSetForObserver.add(resultPoint);
+            }
+
+            for (long nodeRef : closedSet){
+                PathFinderPoint point = pathFinder.nodeInfoMap.getPoint(nodeRef);
+                PathFinderResultPoint resultPoint = new PathFinderResultPoint(point.geoPoint, 0);
+                closedSetForObserver.add(resultPoint);
+            }
+
+            ob.onProgress(openSetForObserver, closedSetForObserver);
+        }
+    }
+
+    public void onCompleted(Set<Long> openSet, Set<Long> closedSet, List<PathFinderResultPoint> path){
+        if (ob != null){
+            if (openSetForObserver == null){
+                openSetForObserver = new HashSet<PathFinderResultPoint>();
+            }
+
+            if (closedSetForObserver == null){
+                closedSetForObserver = new HashSet<PathFinderResultPoint>();
+            }
+
+            for (long nodeRef : openSet){
+                PathFinderPoint point = pathFinder.nodeInfoMap.getPoint(nodeRef);
+                PathFinderResultPoint resultPoint = new PathFinderResultPoint(point.geoPoint, 0);
+                openSetForObserver.add(resultPoint);
+            }
+
+            for (long nodeRef : closedSet){
+                PathFinderPoint point = pathFinder.nodeInfoMap.getPoint(nodeRef);
+                PathFinderResultPoint resultPoint = new PathFinderResultPoint(point.geoPoint, 0);
+                closedSetForObserver.add(resultPoint);
+            }
+
+            ob.onCompleted(openSetForObserver, closedSetForObserver, path);
+        }
+    }
+}
+
 /**
  * Created by chenjie3 on 2016/5/18.
  */
@@ -246,11 +313,13 @@ public class PathFinder {
     }
 
     double heuristicCostEstimation(long nodeFrom, long nodeTo){
-        return distance(nodeFrom, nodeTo);
+        return distance(nodeFrom, nodeTo) * 10;
     }
 
     // A* search. See https://en.wikipedia.org/wiki/A*_search_algorithm
-    List<PathFinderResultPoint> searchPath(long nodeFrom, long nodeTo){
+    List<PathFinderResultPoint> searchPath(long nodeFrom, long nodeTo, PathFinderObserver observer){
+        ObserverHelper obHelper = new ObserverHelper(this, observer);
+
         nodeInfoMap.clear();
         nodeInfoMap.add(nodeFrom);
         nodeInfoMap.add(nodeTo);
@@ -268,6 +337,7 @@ public class PathFinder {
         CameFrom cameFrom = new CameFrom();
 
         openSet.add(nodeFrom);
+        obHelper.onProgress(openSet.set, closedSet.set);
 
         nodeInfoMap.setGScore(nodeFrom, 0);// The cost of going from start to start is zero.
         nodeInfoMap.setFScore(nodeFrom, heuristicCostEstimation(nodeFrom, nodeTo));// For the first node, that value is completely heuristic.
@@ -275,11 +345,15 @@ public class PathFinder {
         while (!openSet.isEmpty()){
             long nodeCurrent = openSet.lowestFValuePoint();
             if (nodeCurrent == nodeTo){
-                return constructPath(cameFrom, nodeCurrent, nodeFrom);
+                List<PathFinderResultPoint> resultPath = constructPath(cameFrom, nodeCurrent, nodeFrom);
+                obHelper.onCompleted(openSet.set, closedSet.set, resultPath);
+                return resultPath;
             }
 
             openSet.remove(nodeCurrent); // will remove nodeCurrent
             closedSet.add(nodeCurrent);
+
+            obHelper.onProgress(openSet.set, closedSet.set);
 
             //for each neighbor of current
             Set<Pair<Long, Long>> neighbors = nodeInfoMap.getNeighbors(nodeCurrent);
@@ -294,6 +368,14 @@ public class PathFinder {
                 double tentativeGScore = nodeInfoMap.GScore(nodeCurrent) + distance(nodeCurrent, neighbor.getKey());
                 if (!openSet.contains(neighbor.getKey())){
                     openSet.add(neighbor.getKey());
+                    obHelper.onProgress(openSet.set, closedSet.set);
+
+                    // ??? this part code is not on wiki. is it necessary or even correct ?
+                    if (neighbor.getKey() == nodeTo){
+                        List<PathFinderResultPoint> resultPath = constructPath(cameFrom, nodeCurrent, nodeFrom);
+                        obHelper.onCompleted(openSet.set, closedSet.set, resultPath);
+                        return resultPath;
+                    }
                 }
                 else{
                     if (tentativeGScore >= nodeInfoMap.GScore(neighbor.getKey())){
@@ -334,5 +416,16 @@ public class PathFinder {
         }
 
         return path;
+    }
+
+    void onProgress(PathFinderObserver observer, Set<Long> openSet, Set<Long> closedSet){
+        Set<PathFinderResultPoint> openSetForObserver = null;
+        Set<PathFinderResultPoint> closedSetForObserver = null;
+
+        if (observer != null){
+            openSetForObserver = new HashSet<PathFinderResultPoint>();
+        }
+
+
     }
 }
