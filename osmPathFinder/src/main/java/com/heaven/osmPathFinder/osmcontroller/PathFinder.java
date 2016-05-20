@@ -313,7 +313,7 @@ public class PathFinder {
     }
 
     double heuristicCostEstimation(long nodeFrom, long nodeTo){
-        return distance(nodeFrom, nodeTo);
+        return distance(nodeFrom, nodeTo) / 1.44 * 2;
     }
 
     // A* search. See https://en.wikipedia.org/wiki/A*_search_algorithm
