@@ -1,5 +1,9 @@
 package com.heaven.osmPathFinder.UI;
 
+import com.heaven.osmPathFinder.UI.Action.FindPathAction;
+import com.heaven.osmPathFinder.UI.Action.FindPathSbSAction;
+import com.heaven.osmPathFinder.UI.Action.LoadMapAction;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -27,7 +31,7 @@ public class MainFrame extends JFrame {
         mainPanel.setBackground(Color.DARK_GRAY);
         this.getContentPane().add(mainPanel);
 
-        MapPanel mapPanel = new MapPanel();
+        DoubleImageLayerPanel mapPanel = new DoubleImageLayerPanel();
         mapPanel.setBackground(Color.blue);
         mapPanel.setPreferredSize(new Dimension(900, 900));
         mainPanel.add(mapPanel);
@@ -36,6 +40,16 @@ public class MainFrame extends JFrame {
         loadMapButton.setPreferredSize(new Dimension(100, 50));
         mainPanel.add(loadMapButton);
         loadMapButton.addActionListener(new LoadMapAction(mapPanel));
+
+        JButton findPathButton = new JButton("find path");
+        findPathButton.setPreferredSize(new Dimension(100, 50));
+        mainPanel.add(findPathButton);
+        findPathButton.addActionListener(new FindPathAction(mapPanel));
+
+        JButton findPathButtonSbS = new JButton("find path step by step");
+        findPathButtonSbS.setPreferredSize(new Dimension(100, 50));
+        mainPanel.add(findPathButtonSbS);
+        findPathButtonSbS.addActionListener(new FindPathSbSAction(mapPanel));
 
 
         //Display the window.

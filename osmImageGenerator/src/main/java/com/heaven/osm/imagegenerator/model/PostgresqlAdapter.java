@@ -142,22 +142,18 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            statement = conn.prepareStatement("select id as nd_ref, ST_AsGeoJson(wgs84long_lat) as point_json from node right join (select nd_ref from way_nd where way_ref=? order by \"order\") as way_nodes " +
+            statement = conn.prepareStatement("select id as nd_ref, ST_X(wgs84long_lat) as lon, ST_Y(wgs84long_lat) as lat from node right join (select nd_ref from way_nd where way_ref=? order by \"order\") as way_nodes " +
                     "on " +
                     "node.id=way_nodes.nd_ref ");
             statement.setLong(1, way);
 
             rs = statement.executeQuery();
             while (rs.next()){
-                String pointInJson = rs.getString("point_json");
-
-                ObjectMapper mapper = new ObjectMapper();
-                PostgisGeom parsedPoint = mapper.readValue(pointInJson, PostgisGeom.class);
 
                 GeomPoint newPoint = new GeomPoint();
                 newPoint.nodeId = rs.getLong("nd_ref");
-                newPoint.longitude = parsedPoint.coordinates[0];
-                newPoint.latitude = parsedPoint.coordinates[1];
+                newPoint.longitude = rs.getDouble("lon");
+                newPoint.latitude = rs.getDouble("lat");
 
                 points.add(newPoint);
             }
@@ -173,12 +169,6 @@ public class PostgresqlAdapter {
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return points;

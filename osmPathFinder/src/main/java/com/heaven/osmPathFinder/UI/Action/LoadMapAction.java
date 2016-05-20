@@ -1,11 +1,10 @@
-package com.heaven.osmPathFinder.UI;
+package com.heaven.osmPathFinder.UI.Action;
 
 import com.heaven.osmPathFinder.ServiceInvoker;
-import com.heaven.osmPathFinder.model.GenerateImageRequest;
-import com.heaven.osmPathFinder.model.GeomBox;
+import com.heaven.osmPathFinder.UI.DoubleImageLayerPanel;
+import com.heaven.osmPathFinder.UI.TestData;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -20,25 +19,15 @@ public class LoadMapAction implements ActionListener {
     private static final Logger LOGGER = Logger.getLogger(String.valueOf(LoadMapAction.class));
 
 
-    private MapPanel mapPanel = null;
+    private DoubleImageLayerPanel mapPanel = null;
 
-    public LoadMapAction(MapPanel _mapPanel){
+    public LoadMapAction(DoubleImageLayerPanel _mapPanel){
         mapPanel = _mapPanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        GenerateImageRequest generateImageRequest = new GenerateImageRequest();
-
-        generateImageRequest.imageHeight = 1024;
-        generateImageRequest.imageWidth = 1024;
-        generateImageRequest.boundingBox = new GeomBox();
-        generateImageRequest.boundingBox.minlat = 40.0528;
-        generateImageRequest.boundingBox.maxlat = 40.0809;
-        generateImageRequest.boundingBox.minlon = 116.3042;
-        generateImageRequest.boundingBox.maxlon = 116.3446;
-
-        byte[] responseBuf = ServiceInvoker.loadMap(generateImageRequest);
+        byte[] responseBuf = ServiceInvoker.loadMap(TestData.sharedInstance().generateImageRequest);
         InputStream in = new ByteArrayInputStream(responseBuf);
         try {
             BufferedImage bufferedImage = ImageIO.read(in);

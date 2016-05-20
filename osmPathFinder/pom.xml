@@ -109,5 +109,19 @@
     </dependency>
     <!--apache http client end-->
 
+      <!--postgreSQL begin-->
+      <dependency>
+          <groupId>c3p0</groupId>
+          <artifactId>c3p0</artifactId>
+          <version>0.9.1.2</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <version>9.4.1208.jre7</version>
+      </dependency>
+      <!--postgreSQL end-->
+
   </dependencies>
 </project>
