@@ -95,7 +95,7 @@ class NodeInfoMap{
             return;
         }
 
-        point.f = g;
+        point.g = g;
     }
 
     public GeomPoint getGeomInfo(long nodeId){
@@ -313,7 +313,7 @@ public class PathFinder {
     }
 
     double heuristicCostEstimation(long nodeFrom, long nodeTo){
-        return distance(nodeFrom, nodeTo) * 10;
+        return distance(nodeFrom, nodeTo);
     }
 
     // A* search. See https://en.wikipedia.org/wiki/A*_search_algorithm
@@ -371,11 +371,11 @@ public class PathFinder {
                     obHelper.onProgress(openSet.set, closedSet.set);
 
                     // ??? this part code is not on wiki. is it necessary or even correct ?
-                    if (neighbor.getKey() == nodeTo){
-                        List<PathFinderResultPoint> resultPath = constructPath(cameFrom, nodeCurrent, nodeFrom);
-                        obHelper.onCompleted(openSet.set, closedSet.set, resultPath);
-                        return resultPath;
-                    }
+//                    if (neighbor.getKey() == nodeTo){
+//                        List<PathFinderResultPoint> resultPath = constructPath(cameFrom, nodeCurrent, nodeFrom);
+//                        obHelper.onCompleted(openSet.set, closedSet.set, resultPath);
+//                        return resultPath;
+//                    }
                 }
                 else{
                     if (tentativeGScore >= nodeInfoMap.GScore(neighbor.getKey())){
