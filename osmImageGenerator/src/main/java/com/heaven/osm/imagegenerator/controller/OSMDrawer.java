@@ -152,17 +152,17 @@ public class OSMDrawer {
         }
 
         // draw debug info
-        for (int layerIdx = 0; layerIdx < allLayers.size(); layerIdx++) {
-            HashMap<String, LinkedList<GraphicsLayerElement>> layers = allLayers.get(allLayers.size() - 1 - layerIdx);
-            List<GraphicsLayerElement> elements;
-
-            elements = layers.get("layer_debug");
-            for (int i = 0; i < elements.size(); i++) {
-                drawDebugInfo(elements.get(i),
-                            boundingBox, imageWidth, imageHeight,
-                            g);
-            }
-        }
+//        for (int layerIdx = 0; layerIdx < allLayers.size(); layerIdx++) {
+//            HashMap<String, LinkedList<GraphicsLayerElement>> layers = allLayers.get(allLayers.size() - 1 - layerIdx);
+//            List<GraphicsLayerElement> elements;
+//
+//            elements = layers.get("layer_debug");
+//            for (int i = 0; i < elements.size(); i++) {
+//                drawDebugInfo(elements.get(i),
+//                            boundingBox, imageWidth, imageHeight,
+//                            g);
+//            }
+//        }
     }
 
     public void drawDebugInfo(GraphicsLayerElement element,

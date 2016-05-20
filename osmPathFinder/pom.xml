@@ -1,0 +1,113 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.heaven</groupId>
+  <artifactId>osmPathFinder</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+    <profiles>
+
+        <profile>
+            <id>debug</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <log.dir>C:/Projects/osm/logs</log.dir>
+                <log.file>osmParser.log</log.file>
+                <postgresql.jdbcUrl>jdbc:postgresql://192.168.95.129:5432/osm</postgresql.jdbcUrl>
+                <postgresql.user>postgres</postgresql.user>
+                <postgresql.password>CjTm803048</postgresql.password>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>production</id>
+            <properties>
+                <log.dir>/home/ubuntu/osm/logs</log.dir>
+                <log.file>osmParser.log</log.file>
+                <postgresql.jdbcUrl>jdbc:postgresql://192.168.95.129:5432/osm</postgresql.jdbcUrl>
+                <postgresql.user>postgres</postgresql.user>
+                <postgresql.password>CjTm803048</postgresql.password>
+            </properties>
+        </profile>
+
+    </profiles>
+
+    <build>
+      <finalName>osmPathFinder</finalName>
+
+      <!--in order to replace ${xxxxx} to real value. The real value is at pom.xml, ${xxxxx} is at resources folder}-->
+      <resources>
+          <resource>
+              <directory>src/main/resources</directory>
+              <includes>
+                  <!--这里指定那些文件拷贝到最后的包里面-->
+                  <include>*.properties</include>
+                  <include>*.json</include>
+                  <include>*.xml</include>
+                  <include>jdbc/*.properties</include>
+                  <include>jdbc/*.xml</include>
+              </includes>
+              <filtering>true</filtering>
+          </resource>
+      </resources>
+      <!---->
+
+      <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <packaging>jar</packaging>
+
+  <name>osmPathFinder</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+
+      <!--jackson json begin-->
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+          <version>2.5.4</version>
+      </dependency>
+      <!--jackson json end-->
+
+
+      <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>1.2.15</version>
+      </dependency>
+
+    <!-- apache http client begin-->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.3.5</version>
+    </dependency>
+    <!--apache http client end-->
+
+  </dependencies>
+</project>
