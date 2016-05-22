@@ -281,6 +281,12 @@ public class OSMDrawer {
             innerStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 0, new float[]{9}, 0);
             innerClr = new Color(123, 121, 247);
         }
+        else if (highwayValue.compareToIgnoreCase("living_street") == 0){
+            edgeStroke = null;
+            edgeClr = null;
+            innerStroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerClr =  new Color(255, 255, 255);
+        }
         else{
             edgeStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(173, 173, 173);

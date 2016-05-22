@@ -45,4 +45,43 @@ select relation_ref from relation_bounding_box where not(40.112 < minlat or 116.
 
 -- select all ways whose bounding box intersects with boundingBox
 select way_ref from way_bounding_box where not(boundingBox.maxlat < minlat or boundingBox.maxlon < minlon or maxlat < boundingBox.minlat or maxlon < boundingBox.minlon)
+select way_ref from way_bounding_box where not(40.112 < minlat or 116.344 < minlon or maxlat < 40.086 or maxlon < 116.268) 
 
+-- only select visible ways whose bounding box intersects with boundingBox
+select way_ref from way_bounding_box
+ left join 
+(select way.id from way where way.visible=true) as way
+on way_bounding_box.way_ref=way.id
+where not(40.112 < minlat or 116.344 < minlon or maxlat < 40.086 or maxlon < 116.268) 
+
+
+-- get geom points of a way
+select node.id as nd_ref, ST_AsGeoJson(wgs84long_lat) as point_json from node right join (select * from way_nd where way_ref=24797748) as way_nodes 
+on
+node.id=way_nodes.nd_ref 
+
+-- lod 5, no building
+select way_ref from way_bounding_box where not(40.0997 < minlat or 116.3158 < minlon or maxlat < 40.0785 or maxlon < 116.2866) and 
+	way_ref not in(select way_ref from way_tag where k='building' )
+	
+-- lod 10
+-- no building, no noname tertiary highway
+select way_ref from way_bounding_box where not(40.0997 < minlat or 116.3158 < minlon or maxlat < 40.0785 or maxlon < 116.2866) and  
+(way_ref not in (select way_ref from way_tag where (k='building' or 
+	(k='highway' and v='cycleway') or 
+	(k='highway' and v='footway') or 
+	(k='highway' and v='residential') or 
+	(k='highway' and v='service') or 
+	(k='highway' and v='unclassified'))))
+and
+(way_ref not in (select way_ref from way_tag where (k='highway' and v='tertiary') and
+	way_ref not in (select way_ref from way_tag where k='name' and
+		way_ref in (select way_ref from way_tag where (k='highway' and v='tertiary')))))
+		
+
+		
+-- select all landuse with coordinates		
+select way_ref, nd_ref, wgs84long_lat from
+	(select way_ref, nd_ref from way_nd where way_ref in (select way_ref from way_tag where k='landuse')) as landuse
+left join node
+on landuse.nd_ref=node.id
