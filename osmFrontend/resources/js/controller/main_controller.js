@@ -6,7 +6,7 @@ if (!MainController) {
     var MainController = function () {
         this.data = new Object();
         var log = log4javascript.getDefaultLogger();
-        log.info("hello world!");
+        log.info("MainController loaded...");
     };
 
     MainController.prototype = {

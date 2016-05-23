@@ -1,13 +1,35 @@
-
 <div class="content_container" id="content_container">
   <div class="map_container" id="map_container">
-    <div class="search_box">
-      <div align="center">{$T}</div>
-    </div>
+    <div class="search_box">{$T} aabbccdd</div>
+    <canvas id="map_canvas" class="map_canvas" width="1024" height="1024">
+      <p>This is fallback content
+        for users of assistive technologies
+        or of browsers that don't have
+        full support for the Canvas API.</p>
+    </canvas>
   </div>
 </div>
 
 <script>
-    // init next level controller
-    //window.uicontroller.login.init("hello");
+    var log = log4javascript.getDefaultLogger();
+    log.info("main.html loaded...");
+
+    var canvas = document.getElementById('map_canvas');
+    var context = canvas.getContext('2d');
+
+    context.beginPath();
+    context.moveTo(0, 0);
+    context.lineTo(500, 500);
+    context.stroke();
+
+    $("#map_canvas").drawRect({
+        fillStyle: 'steelblue',
+        layer: true,
+        name: 'blueRectangle',
+        fromCenter: false,
+        x: 50,
+        y: 50,
+        width: 400,
+        height: 200
+    });
 </script>

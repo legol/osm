@@ -10,9 +10,20 @@
     height: 100%;
     width: 100%;
     margin: auto;
+    position: relative;
 }
 
 .search_box {
+    position: absolute;
+    top: 0;
+    left: 0;
     background-color: #CCCCCC;
-    float:top;
+    z-index: 10;
+}
+
+.map_canvas {
+    height: 100%;
+    width: 100%;
+    border: 1px solid #FF0000;
+    border-radius: 0px;
 }
