@@ -1,6 +1,18 @@
 .content_container {
     background-color: #CCC;
-    height: 300px;
-    width: 400px;
+    height: 100%;
+    width: 100%;
     margin: auto;
+}
+
+.map_container {
+    background-color: #FFFFFF;
+    height: 100%;
+    width: 100%;
+    margin: auto;
+}
+
+.search_box {
+    background-color: #CCCCCC;
+    float:top;
 }
