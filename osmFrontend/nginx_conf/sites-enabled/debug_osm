@@ -1,0 +1,38 @@
+server
+{
+ #       listen 443;
+        listen 7653;
+        server_name heaven.com;
+
+    #存放web源码的父路径，这里假定存放在上述目录下的soulmate_web文件夹;
+    location /osmFrontend/ {
+        root   /home/ubuntu/git_root/osm/;
+        index  index.html index.htm;
+    }
+
+    #其他的所有请求
+    location / {
+        proxy_pass http://192.168.56.1:8081/;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_connect_timeout 60;
+        proxy_read_timeout 600;
+        proxy_send_timeout 600;
+        proxy_ignore_client_abort on;
+    }
+
+	location ~* /.svn/ {
+	        deny all;
+	}
+	
+	location ~* \.(tar|gz|zip|tgz|sh)$ {
+	    deny all;
+	}
+	
+	
+	access_log /home/ubuntu/nginx_logs/debug_osm.access.log main;
+	error_log /home/ubuntu/nginx_logs/debug_osm.error.log;
+
+}
