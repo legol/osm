@@ -11,15 +11,5 @@
 </div>
 
 <script>
-    var log = log4javascript.getDefaultLogger();
-    log.info("main.html loaded...");
-
-    var canvas = document.getElementById('map_canvas');
-    var context = canvas.getContext('2d');
-
-    context.beginPath();
-    context.moveTo(0, 0);
-    context.lineTo(500, 500);
-    context.stroke();
-
+    window.contentController.main.init(null);
 </script>

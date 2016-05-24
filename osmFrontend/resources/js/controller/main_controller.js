@@ -12,6 +12,9 @@ if (!MainController) {
     MainController.prototype = {
         main: {
             init: function (data) {
+                var log = log4javascript.getDefaultLogger();
+                log.info("MainController initialized.");
+
                 var r = new Render();
                 r.render($("#main_container"), "resources/templates/main/main.html", data);
             },
