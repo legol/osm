@@ -16,30 +16,44 @@ if (!TileController) {
             log.info("TileController initialized.");
 
             this.data.scale = 1.0;
-            this.data.viewport = {x:0, y:0, width:$("#map_container").innerWidth(), height:$("#map_container").innerHeight()};
+            this.data.viewport = {left:0, top:0, width:$("#map_container").innerWidth(), height:$("#map_container").innerHeight()};
 
             this.data.tileArray = new Array();
             this.data.tileWidth = 256;
             this.data.tileHeight = 256;
 
-//            $("#map_canvas").offset({left:-200, top:200});
-
             this.observeParentSizeChange();
+
+            this.moveViewport(400, 600);
+        },
+
+        moveViewport: function(newL, newT){
+            this.data.viewport.left = newL;
+            this.data.viewport.top = newT;
+
+            $("#map_canvas").position({
+                my: "left top",
+                at: "left-"+newL + " top-"+newT,
+                of: "#map_container",
+                collision: "none"
+            });
+
+            this.viewportChanged();
         },
 
         observeParentSizeChange: function() {
-            $(window).on("resize", $.proxy(this.resizeCanvas, this));
-            this.resizeCanvas();
+            $(window).on("resize", $.proxy(this.viewportChanged, this));
+            //$("#map_container").on("resize", $.proxy(this.viewportChanged, this));
         },
 
-        resizeCanvas: function() {
+        viewportChanged: function() {
             var log = log4javascript.getDefaultLogger();
-            log.info("TileController.resizeCanvas() called.");
+            log.info("TileController.viewportChanged() called.");
 
-            this.data.viewport.width = $("#map_container").innerWidth();
-            this.data.viewport.height = $("#map_container").innerHeight();
-            this.data.viewport.x = 0;
-            this.data.viewport.y = 0;
+            this.data.viewport = {left:-$("#map_canvas").position().left,
+                top:-$("#map_canvas").position().top,
+                width:$("#map_container").innerWidth(),
+                height:$("#map_container").innerHeight()};
 
             log.info("viewport=" + JSON.stringify(this.data.viewport));
 
@@ -50,19 +64,19 @@ if (!TileController) {
             var log = log4javascript.getDefaultLogger();
 
             // add missing tiles and remove redundant ones.
-            var t = this.data.viewport.y;
-            var b = this.data.viewport.y + this.data.viewport.height;
-            var l = this.data.viewport.x;
-            var r = this.data.viewport.x + this.data.viewport.width;
-            l = (l % this.data.tileWidth) * this.data.tileWidth;
-            t = (t % this.data.tileHeight) * this.data.tileHeight;
+            var t = this.data.viewport.top;
+            var b = this.data.viewport.top + this.data.viewport.height;
+            var l = this.data.viewport.left;
+            var r = this.data.viewport.left + this.data.viewport.width;
+            l = Math.floor(l / this.data.tileWidth) * this.data.tileWidth;
+            t = Math.floor(t / this.data.tileHeight) * this.data.tileHeight;
 
             log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
 
             while(t <= b){
 
-                var l = this.data.viewport.x;
-                l = (l % this.data.tileWidth) * this.data.tileWidth;
+                var l = this.data.viewport.left;
+                l = Math.floor(l / this.data.tileWidth) * this.data.tileWidth;
 
                 log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
 
@@ -81,7 +95,7 @@ if (!TileController) {
 
                     if (!tileExist){
                         var log = log4javascript.getDefaultLogger();
-                        log.info("add tile at: " + l + ", " + t);
+                        //log.info("add tile at: " + l + ", " + t);
 
                         var newTile = new Tile();
                         newTile.init(l, t);
@@ -90,7 +104,7 @@ if (!TileController) {
                         this.data.tileArray.push(newTile);
                     }
                     else{
-                        log.info("tile exists at: " + l + ", " + t);
+                        //log.info("tile exists at: " + l + ", " + t);
                     }
 
                     l += this.data.tileWidth;
