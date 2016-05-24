@@ -1,0 +1,6 @@
+.tile {
+    height:256px;
+    width: 256px;
+    border: 1px solid #FF0000;
+    margin:0px;
+}
