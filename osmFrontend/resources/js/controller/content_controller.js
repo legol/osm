@@ -6,8 +6,6 @@ if (!ContentController) {
     var ContentController = function () {
         this.data = new Object();
 
-
-
         var log = log4javascript.getDefaultLogger();
         log.info("ContentController loaded...");
     };
@@ -19,6 +17,7 @@ if (!ContentController) {
                 log.info("ContentController initialized.");
 
                 window.tileController.init();
+                window.mapLoader.init();
             },
         },
     };
