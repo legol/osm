@@ -16,7 +16,12 @@ if (!TileController) {
             log.info("TileController initialized.");
 
             $("#map_canvas").draggable({
-                drag: $.proxy(this.onDragCanvas, this)});
+                start: $.proxy(this.onDragCanvas, this),
+                drag: $.proxy(this.onDragCanvas, this),
+                stop: $.proxy(this.onDragCanvas, this)
+            });
+
+            this.moveViewport(0, 0);
 
             this.data.scale = 1.0;
             this.data.viewport = {left:-$("#map_canvas").position().left,
@@ -29,8 +34,7 @@ if (!TileController) {
             this.data.tileHeight = 256;
 
             this.observeParentSizeChange();
-
-            this.moveViewport(400, 600);
+            this.viewportChanged();
         },
 
         onDragCanvas: function(event, ui){
@@ -107,6 +111,7 @@ if (!TileController) {
                         var newTile = new Tile();
                         newTile.init(l, t);
                         newTile.addTo("map_canvas");
+
 
                         this.data.tileArray.push(newTile);
                     }
