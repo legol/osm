@@ -15,8 +15,14 @@ if (!TileController) {
             var log = log4javascript.getDefaultLogger();
             log.info("TileController initialized.");
 
+            $("#map_canvas").draggable({
+                drag: $.proxy(this.onDragCanvas, this)});
+
             this.data.scale = 1.0;
-            this.data.viewport = {left:0, top:0, width:$("#map_container").innerWidth(), height:$("#map_container").innerHeight()};
+            this.data.viewport = {left:-$("#map_canvas").position().left,
+                top:-$("#map_canvas").position().top,
+                width:$("#map_container").innerWidth(),
+                height:$("#map_container").innerHeight()};
 
             this.data.tileArray = new Array();
             this.data.tileWidth = 256;
@@ -27,10 +33,11 @@ if (!TileController) {
             this.moveViewport(400, 600);
         },
 
-        moveViewport: function(newL, newT){
-            this.data.viewport.left = newL;
-            this.data.viewport.top = newT;
+        onDragCanvas: function(event, ui){
+            this.viewportChanged();
+        },
 
+        moveViewport: function(newL, newT){
             $("#map_canvas").position({
                 my: "left top",
                 at: "left-"+newL + " top-"+newT,
