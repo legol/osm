@@ -69,6 +69,27 @@ public class ImageGenerator {
         }
     }
 
+    // for GET request
+    @RequestMapping(value = "/map")
+    public void generateImage2(HttpServletRequest request, HttpServletResponse response) {
+        GenerateImageRequest generateImageRequest = new GenerateImageRequest();
+
+        generateImageRequest.imageWidth = 256;
+        generateImageRequest.imageHeight = 256;
+        generateImageRequest.boundingBox = new GeomBox();
+
+        double minlat = Double.parseDouble(request.getParameter("minlat"));
+        double minlot = Double.parseDouble(request.getParameter("minlon"));
+
+        generateImageRequest.boundingBox.minlat = minlat;
+        generateImageRequest.boundingBox.maxlat = minlat + 0.008;
+        generateImageRequest.boundingBox.minlon = minlot;
+        generateImageRequest.boundingBox.maxlon = minlot + 0.01;
+
+        generateImage(request, generateImageRequest, response);
+    }
+
+    // for POST request
     @RequestMapping(value = "/generateImage")
     public void generateImage(HttpServletRequest request, @RequestBody GenerateImageRequest generateImageRequest,
                               HttpServletResponse response){
@@ -83,10 +104,10 @@ public class ImageGenerator {
                     generateImageRequest.imageWidth, generateImageRequest.imageHeight,
                     g);
 
-            PathDrawer.sharedInstance().drawPath(generateImageRequest.boundingBox,
-                    generateImageRequest.imageWidth, generateImageRequest.imageHeight,
-                    g,
-                    3315887351L, 3508237910L);
+//            PathDrawer.sharedInstance().drawPath(generateImageRequest.boundingBox,
+//                    generateImageRequest.imageWidth, generateImageRequest.imageHeight,
+//                    g,
+//                    3315887351L, 3508237910L);
 
             jpegOutputStream = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "jpeg", jpegOutputStream);

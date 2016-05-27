@@ -23,7 +23,7 @@ if (!Tile) {
             this.data.position.top = _top;
 
             this.data.div = document.createElement('div');
-            this.data.div.innerText = this.getId();
+            this.data.div.innerText = "";
             this.data.div.id = this.getId();
             this.data.div.className = 'tile';
         },

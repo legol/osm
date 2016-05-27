@@ -112,8 +112,9 @@ if (!TileController) {
                         newTile.init(l, t);
                         newTile.addTo("map_canvas");
 
-
                         this.data.tileArray.push(newTile);
+
+                        window.mapLoader.loadMap(l/256, t/256, newTile.getId());
                     }
                     else{
                         //log.info("tile exists at: " + l + ", " + t);

@@ -85,3 +85,10 @@ select way_ref, nd_ref, wgs84long_lat from
 	(select way_ref, nd_ref from way_nd where way_ref in (select way_ref from way_tag where k='landuse')) as landuse
 left join node
 on landuse.nd_ref=node.id
+
+-- all center point of landuse
+select way_ref, ST_Centroid(ST_MakeLine(wgs84long_lat)) from
+	(select way_ref, nd_ref from way_nd where way_ref in (select way_ref from way_tag where k='landuse')) as landuse
+left join node
+on landuse.nd_ref=node.id
+group by way_ref
