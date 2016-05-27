@@ -26,6 +26,13 @@ if (!Tile) {
             this.data.div.innerText = "";
             this.data.div.id = this.getId();
             this.data.div.className = 'tile';
+
+            this.data.debug_div = document.createElement('div');
+            this.data.debug_div.innerText = this.getId();
+            this.data.debug_div.id = this.getId() + "_debug";
+            this.data.debug_div.className = 'tile_debug';
+
+            this.data.div.appendChild(this.data.debug_div);
         },
 
         getId: function(){
@@ -47,6 +54,10 @@ if (!Tile) {
         removeFromParent: function(){
 
         },
+
+        setDebugText: function(debug_text){
+            this.data.debug_div.innerText = debug_text;
+        }
     };
 }
 
