@@ -276,7 +276,7 @@ public class OSMDrawer {
         if (ruler >= 100){
             wayWidth1 = 8;
             wayWidth2 = 6;
-            wayWidth3 = 2;
+            wayWidth3 = 3;
         }
 
         String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
@@ -328,6 +328,12 @@ public class OSMDrawer {
             edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(173, 173, 173);
             innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            innerClr =  new Color(254, 254, 254);
+        }
+        else if (highwayValue.compareToIgnoreCase("service") == 0){
+            edgeStroke = new BasicStroke(wayWidth3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeClr = new Color(173, 173, 173);
+            innerStroke = new BasicStroke(wayWidth3 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(254, 254, 254);
         }
         else{
