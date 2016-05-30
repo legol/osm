@@ -6,6 +6,7 @@ import com.heaven.osm.imagegenerator.model.GraphicsPoint;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -110,4 +111,13 @@ public class OSMUtils {
         return Math.sqrt(distance);
     }
 
+    public static double millimetersFromPixels(double pixels){
+        double dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+        return (pixels * 25.4) / dpi;
+    }
+
+    public static double pixelsFromMillimeters(double millimeters){
+        double dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+        return (millimeters * dpi) / 25.4;
+    }
 }
