@@ -242,6 +242,20 @@ public class OSMDrawer {
     public void drawHighway(List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g){
+        double distance = OSMUtils.distance(boundingBox.minlat, boundingBox.maxlat,
+                boundingBox.minlon, boundingBox.maxlon,
+                0, 0);
+
+        int wayWidth1 = 22;
+        int wayWidth2 = 8;
+        int wayWidth3 = 4;
+        if (distance > 5000) {
+            // 5km
+            wayWidth1 = 8;
+            wayWidth2 = 6;
+            wayWidth3 = 2;
+        }
+
         String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
 
         Graphics2D g1 = (Graphics2D) g.create();
@@ -252,27 +266,27 @@ public class OSMDrawer {
         Color innerClr = null;
 
         if (highwayValue.compareToIgnoreCase("motorway") == 0){
-            edgeStroke = new BasicStroke(7, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(221, 41, 108);
-            innerStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr = new Color(232, 143, 161);
         }
         else if (highwayValue.compareToIgnoreCase("trunk") == 0){
-            edgeStroke = new BasicStroke(7, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(203, 81, 52);
-            innerStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(249, 177, 156);
         }
         else if (highwayValue.compareToIgnoreCase("primary") == 0){
-            edgeStroke = new BasicStroke(7, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(173, 123, 26);
-            innerStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(252, 214, 164);
         }
         else if (highwayValue.compareToIgnoreCase("secondary") == 0){
-            edgeStroke = new BasicStroke(7, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(124, 137, 23);
-            innerStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(246, 250, 190);
         }
         else if (highwayValue.compareToIgnoreCase("cycleway") == 0 || highwayValue.compareToIgnoreCase("footway") == 0){
@@ -284,13 +298,13 @@ public class OSMDrawer {
         else if (highwayValue.compareToIgnoreCase("living_street") == 0){
             edgeStroke = null;
             edgeClr = null;
-            innerStroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerStroke = new BasicStroke(wayWidth3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(255, 255, 255);
         }
         else{
-            edgeStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeStroke = new BasicStroke(wayWidth2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             edgeClr = new Color(173, 173, 173);
-            innerStroke = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            innerStroke = new BasicStroke(wayWidth2 - 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(254, 254, 254);
         }
 
@@ -316,6 +330,21 @@ public class OSMDrawer {
 
             g1.drawLine(p1.x, p1.y, p2.x, p2.y);
         }
+
+        // for debug
+        g1.setColor(Color.red);
+        g1.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        for (int i = 0; i < points.size(); i++){
+            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+
+            drawCenteredCircle(g1, p1.x, p1.y, wayWidth1 / 2);
+        }
+    }
+
+    public void drawCenteredCircle(Graphics2D g, int x, int y, int r) {
+        x = x-(r/2);
+        y = y-(r/2);
+        g.fillOval(x,y,r,r);
     }
 
     public void drawHighwayLink(List<GeomPoint> points, List<Pair<String, String>> tags,
@@ -380,6 +409,15 @@ public class OSMDrawer {
             GraphicsPoint p2 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i + 1), boundingBox, imageWidth, imageHeight);
 
             g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+        }
+
+        // for debug
+        g1.setColor(Color.red);
+        g1.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        for (int i = 0; i < points.size(); i++){
+            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+
+            drawCenteredCircle(g1, p1.x, p1.y, 10);
         }
     }
 
