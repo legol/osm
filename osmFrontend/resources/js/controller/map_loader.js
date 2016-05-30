@@ -20,8 +20,8 @@ if (!MapLoader) {
             var latBase = 40.0552;
             var lonBase = 116.2882;
 
-            var minLat = latBase - latIdx * 0.008;
-            var minLon = lonBase + lonIdx * 0.01;
+            var minLat = latBase - latIdx * 0.004;
+            var minLon = lonBase + lonIdx * 0.005;
 
             var img = document.createElement("IMG");
             img.className = 'tile_img';
@@ -34,8 +34,8 @@ if (!MapLoader) {
                 "http://127.0.0.1:8081/osmImageGenerator/map?minlat=" + minLat + "&minlon=" + minLon
             );
 
-            $divDebug = $("#" + divId + "_debug");
-            $divDebug.text($divDebug.text() + " (" + minLon + ", " + minLat + ")");
+            //$divDebug = $("#" + divId + "_debug");
+            //$divDebug.text($divDebug.text() + " (" + minLon + ", " + minLat + ")");
         },
     };
 

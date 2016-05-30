@@ -82,9 +82,9 @@ public class ImageGenerator {
         double minlot = Double.parseDouble(request.getParameter("minlon"));
 
         generateImageRequest.boundingBox.minlat = minlat;
-        generateImageRequest.boundingBox.maxlat = minlat + 0.008;
+        generateImageRequest.boundingBox.maxlat = minlat + 0.004;
         generateImageRequest.boundingBox.minlon = minlot;
-        generateImageRequest.boundingBox.maxlon = minlot + 0.01;
+        generateImageRequest.boundingBox.maxlon = minlot + 0.005;
 
         generateImage(request, generateImageRequest, response);
     }

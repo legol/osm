@@ -270,12 +270,12 @@ public class OSMDrawer {
         int wayWidth1 = 22;
         int wayWidth2 = 8;
         int wayWidth3 = 4;
-        if (distance > 5000) {
+        //if (distance > 5000) {
             // 5km
             wayWidth1 = 8;
             wayWidth2 = 6;
             wayWidth3 = 2;
-        }
+        //}
 
         String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
 
