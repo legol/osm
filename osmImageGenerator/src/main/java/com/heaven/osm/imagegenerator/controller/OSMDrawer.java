@@ -273,10 +273,15 @@ public class OSMDrawer {
         int wayWidth1 = 22;
         int wayWidth2 = 8;
         int wayWidth3 = 4;
-        if (scale >= 100){
+        if (lod < 100 && lod >= 85){
             wayWidth1 = 8;
             wayWidth2 = 6;
             wayWidth3 = 3;
+        }
+        else if (lod < 85 && lod >= 70){
+            wayWidth1 = 5;
+            wayWidth2 = 3;
+            wayWidth3 = 2;
         }
 
 
@@ -313,6 +318,12 @@ public class OSMDrawer {
             innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(246, 250, 190);
         }
+        else if (highwayValue.compareToIgnoreCase("tertiary") == 0){
+            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+            edgeClr = new Color(173, 173, 173);
+            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            innerClr =  new Color(254, 254, 254);
+        }
         else if (highwayValue.compareToIgnoreCase("cycleway") == 0 || highwayValue.compareToIgnoreCase("footway") == 0){
             edgeStroke = null;
             edgeClr = null;
@@ -324,12 +335,6 @@ public class OSMDrawer {
             edgeClr = null;
             innerStroke = new BasicStroke(wayWidth3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             innerClr =  new Color(255, 255, 255);
-        }
-        else if (highwayValue.compareToIgnoreCase("tertiary") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 173, 173);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(254, 254, 254);
         }
         else if (highwayValue.compareToIgnoreCase("service") == 0){
             edgeStroke = new BasicStroke(wayWidth3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
