@@ -233,8 +233,9 @@ public class LevelOfDetailController {
                 }
 
                 for (Pair<String, String> checkingTag : tags) {
-                    if ((checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 && checkingTag.getValue().compareToIgnoreCase(oneLodItem.tag.getValue()) == 0) ||
-                            (checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 && oneLodItem.tag.getValue().compareToIgnoreCase("*") == 0) ){
+                    if (oneLodItem.tag.getKey().compareToIgnoreCase("*") == 0 ||
+                            (checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 && oneLodItem.tag.getValue().compareToIgnoreCase("*") == 0) ||
+                            (checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 && checkingTag.getValue().compareToIgnoreCase(oneLodItem.tag.getValue()) == 0)){
                         if (oneLodItem.needFurtherCalc){
                             return shouldDrawFurtherCalc(oneLodItem, category, tags);
                         }
