@@ -4,6 +4,7 @@ import com.heaven.osm.imagegenerator.model.GenerateImageRequest;
 import com.heaven.osm.imagegenerator.model.GeomBox;
 import com.heaven.osm.imagegenerator.model.PostgresqlAdapter;
 import javafx.scene.shape.Path;
+import javafx.util.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
+import java.util.LinkedList;
 
 
 @Controller
@@ -93,6 +95,10 @@ public class ImageGenerator {
     @RequestMapping(value = "/generateImage")
     public void generateImage(HttpServletRequest request, @RequestBody GenerateImageRequest generateImageRequest,
                               HttpServletResponse response){
+
+        LinkedList<Pair<String, String>> tags = new LinkedList<Pair<String, String>>();
+        tags.add(new Pair<String, String>("building", "yes"));
+        boolean shouldDraw = LevelOfDetailController.sharedInstance().shouldDraw(95, "way", tags);
 
         ByteArrayOutputStream jpegOutputStream = null;
         try {

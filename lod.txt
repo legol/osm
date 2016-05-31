@@ -1,1 +1,3 @@
 level of detail
+100: display everything
+95: no highway:service, no highway:footway, no highway:cycleway, no highway:building, no highway:living_street
