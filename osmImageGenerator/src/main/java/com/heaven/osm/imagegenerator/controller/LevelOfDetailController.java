@@ -15,7 +15,7 @@ import java.util.Map;
 
 class LodItem{
     int lod = 100;
-    public String geomType = ""; // node, way, relation
+    public String category = ""; // node, way, relation
     Pair<String, String> tag = null;
     boolean shouldDraw = false;
     boolean needFurtherCalc = false;
@@ -39,57 +39,186 @@ public class LevelOfDetailController {
         levelOfDetailItems.put(95, new LinkedList<LodItem>());
         levelOfDetailItems.put(90, new LinkedList<LodItem>());
         levelOfDetailItems.put(85, new LinkedList<LodItem>());
-        levelOfDetailItems.put(80, new LinkedList<LodItem>());
-        levelOfDetailItems.put(75, new LinkedList<LodItem>());
-        levelOfDetailItems.put(70, new LinkedList<LodItem>());
-        levelOfDetailItems.put(65, new LinkedList<LodItem>());
-        levelOfDetailItems.put(60, new LinkedList<LodItem>());
-        levelOfDetailItems.put(55, new LinkedList<LodItem>());
-        levelOfDetailItems.put(50, new LinkedList<LodItem>());
-
-        LinkedList<LodItem> lod95 = levelOfDetailItems.get(95);
 
         LodItem item = null;
 
+        // 95  /////////////////////////////////////////////////////////////////////////////////
+        LinkedList<LodItem> lod95 = levelOfDetailItems.get(95);
+
         item = new LodItem();
         item.lod = 95;
-        item.geomType = "way";
-        item.tag = new Pair<String, String>("building", "yes");
+        item.category = "building";
+        item.tag = new Pair<String, String>("building", "*");
         item.shouldDraw = false;
         item.needFurtherCalc = false;
         lod95.add(item);
 
         item = new LodItem();
         item.lod = 95;
-        item.geomType = "way";
-        item.tag = new Pair<String, String>("highway", "footway");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "*");
+        item.shouldDraw = false; // doesn't matter
+        item.needFurtherCalc = true;
         lod95.add(item);
 
+        // 90  /////////////////////////////////////////////////////////////////////////////////
+        LinkedList<LodItem> lod90 = levelOfDetailItems.get(90);
         item = new LodItem();
-        item.lod = 95;
-        item.geomType = "way";
-        item.tag = new Pair<String, String>("highway", "cycleway");
+        item.lod = 90;
+        item.category = "building";
+        item.tag = new Pair<String, String>("building", "*");
         item.shouldDraw = false;
         item.needFurtherCalc = false;
-        lod95.add(item);
+        lod90.add(item);
 
         item = new LodItem();
-        item.lod = 95;
-        item.geomType = "way";
-        item.tag = new Pair<String, String>("highway", "living_street");
+        item.lod = 90;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "*");
+        item.shouldDraw = false; // doesn't matter
+        item.needFurtherCalc = true;
+        lod90.add(item);
+
+        item = new LodItem();
+        item.lod = 90;
+        item.category = "land";
+        item.tag = new Pair<String, String>("landuse", "*");
         item.shouldDraw = false;
         item.needFurtherCalc = false;
-        lod95.add(item);
+        lod90.add(item);
+
+        item = new LodItem();
+        item.lod = 90;
+        item.category = "land";
+        item.tag = new Pair<String, String>("amenity", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod90.add(item);
+
+        item = new LodItem();
+        item.lod = 90;
+        item.category = "land";
+        item.tag = new Pair<String, String>("leisure", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod90.add(item);
+
+        // 85  /////////////////////////////////////////////////////////////////////////////////
+        LinkedList<LodItem> lod85 = levelOfDetailItems.get(85);
+        item = new LodItem();
+        item.lod = 85;
+        item.category = "building";
+        item.tag = new Pair<String, String>("building", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod85.add(item);
+
+        item = new LodItem();
+        item.lod = 85;
+        item.category = "land";
+        item.tag = new Pair<String, String>("landuse", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod85.add(item);
+
+        item = new LodItem();
+        item.lod = 85;
+        item.category = "land";
+        item.tag = new Pair<String, String>("amenity", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod85.add(item);
+
+        item = new LodItem();
+        item.lod = 85;
+        item.category = "land";
+        item.tag = new Pair<String, String>("leisure", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod85.add(item);
+
+        item = new LodItem();
+        item.lod = 85;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "*");
+        item.shouldDraw = false; // doesn't matter
+        item.needFurtherCalc = true;
+        lod85.add(item);
 
     }
 
-    public boolean shouldDrawFurtherCalc(LodItem matchedLodItem, String geomType, List<Pair<String, String>> tags){
-        return false;
+    public boolean shouldDrawFurtherCalc(LodItem matchedLodItem, String category, List<Pair<String, String>> tags){
+
+        if (matchedLodItem.lod == 95){
+            if (matchedLodItem.tag.getKey().compareToIgnoreCase("highway") == 0){
+                for (Pair<String, String> oneTag : tags){
+                    if (oneTag.getKey().compareToIgnoreCase("highway") == 0){
+                        if (oneTag.getValue().compareToIgnoreCase("footway") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("cycleway") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("service") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("living_street") == 0){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        else if (matchedLodItem.lod == 90) {
+            if (category.compareToIgnoreCase("other") == 0){
+                return false;
+            }
+
+            if (matchedLodItem.tag.getKey().compareToIgnoreCase("highway") == 0) {
+                for (Pair<String, String> oneTag : tags) {
+                    if (oneTag.getKey().compareToIgnoreCase("highway") == 0) {
+                        if (oneTag.getValue().compareToIgnoreCase("trunk") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("motorway") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("primary") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("secondary") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("tertiary") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("motorway_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("trunk_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("primary_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("secondary_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("tertiary_link") == 0) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        else if (matchedLodItem.lod == 85) {
+            if (category.compareToIgnoreCase("other") == 0){
+                return false;
+            }
+
+            if (matchedLodItem.tag.getKey().compareToIgnoreCase("highway") == 0) {
+                for (Pair<String, String> oneTag : tags) {
+                    if (oneTag.getKey().compareToIgnoreCase("highway") == 0) {
+                        if (oneTag.getValue().compareToIgnoreCase("trunk") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("motorway") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("primary") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("secondary") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("motorway_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("trunk_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("primary_link") == 0 ||
+                                oneTag.getValue().compareToIgnoreCase("secondary_link") == 0) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return true;
     }
 
-    public boolean shouldDraw(int lod, String geomType, List<Pair<String, String>> tags){
+    public boolean shouldDraw(int lod, String category, List<Pair<String, String>> tags){
         if (levelOfDetailItems.containsKey(lod) == false){
             return true;
         }
@@ -99,16 +228,15 @@ public class LevelOfDetailController {
 
             for (LodItem oneLodItem : lodItems){
 
-                if (oneLodItem.geomType.compareToIgnoreCase(geomType) != 0){
+                if (oneLodItem.category.compareToIgnoreCase(category) != 0){
                     continue;
                 }
 
                 for (Pair<String, String> checkingTag : tags) {
-                    if (checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 &&
-                            checkingTag.getValue().compareToIgnoreCase(oneLodItem.tag.getValue()) == 0){
-
+                    if ((checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 && checkingTag.getValue().compareToIgnoreCase(oneLodItem.tag.getValue()) == 0) ||
+                            (checkingTag.getKey().compareToIgnoreCase(oneLodItem.tag.getKey()) == 0 && oneLodItem.tag.getValue().compareToIgnoreCase("*") == 0) ){
                         if (oneLodItem.needFurtherCalc){
-                            return shouldDrawFurtherCalc(oneLodItem, geomType, tags);
+                            return shouldDrawFurtherCalc(oneLodItem, category, tags);
                         }
                         return oneLodItem.shouldDraw;
                     }
@@ -121,7 +249,7 @@ public class LevelOfDetailController {
 
     public int determinLod(double scale/* meters in one centimeter */){
         if (scale >=100 ){
-            return 95;
+            return 85;
         }
         else{
             return 100;

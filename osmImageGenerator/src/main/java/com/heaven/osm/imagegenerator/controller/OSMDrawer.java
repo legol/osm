@@ -265,6 +265,11 @@ public class OSMDrawer {
                             Graphics2D g, int layer){
 
         double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "highway", tags)){
+            return;
+        }
+
         int wayWidth1 = 22;
         int wayWidth2 = 8;
         int wayWidth3 = 4;
@@ -273,6 +278,7 @@ public class OSMDrawer {
             wayWidth2 = 6;
             wayWidth3 = 3;
         }
+
 
         String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
 
@@ -392,6 +398,10 @@ public class OSMDrawer {
                                 GeomBox boundingBox, int imageWidth, int imageHeight,
                                 Graphics2D g, int layer){
         double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "highway_link", tags)){
+            return;
+        }
 
         int wayWidth1 = 16;
         int wayWidth2 = 8;
@@ -489,6 +499,11 @@ public class OSMDrawer {
     public void drawRail(List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g, int layer){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "rail", tags)){
+            return;
+        }
 
         String railValue = OSMUtils.sharedInstance().tagValue(tags, "railway");
         if (railValue != null && railValue.compareToIgnoreCase("subway") == 0){
@@ -542,6 +557,12 @@ public class OSMDrawer {
     public void drawBoundary(List<GeomPoint> points, List<Pair<String, String>> tags,
                                 GeomBox boundingBox, int imageWidth, int imageHeight,
                                 Graphics2D g){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "boundary", tags)){
+            return;
+        }
+
         Graphics2D g1 = (Graphics2D) g.create();
 
         Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 21.0f, 9.0f, 3.0f, 9.0f }, 0);
@@ -562,6 +583,12 @@ public class OSMDrawer {
     public void drawOther(List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "other", tags)){
+            return;
+        }
+
         Graphics2D g1 = (Graphics2D)g.create();
 
         g1.setColor(Color.white);
@@ -580,6 +607,12 @@ public class OSMDrawer {
     public void drawBuilding(List<GeomPoint> points, List<Pair<String, String>> tags,
                              GeomBox boundingBox, int imageWidth, int imageHeight,
                              Graphics2D g){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "building", tags)){
+            return;
+        }
+
         Graphics2D g1 = (Graphics2D)g.create();
 
         Polygon p=new Polygon();
@@ -599,6 +632,11 @@ public class OSMDrawer {
     public void drawWater(List<GeomPoint> points, List<Pair<String, String>> tags,
                          GeomBox boundingBox, int imageWidth, int imageHeight,
                          Graphics2D g){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "water", tags)){
+            return;
+        }
 
         Graphics2D g1 = (Graphics2D) g.create();
 
@@ -633,6 +671,12 @@ public class OSMDrawer {
     public void drawLand(List<GeomPoint> points, List<Pair<String, String>> tags,
                              GeomBox boundingBox, int imageWidth, int imageHeight,
                              Graphics2D g){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "land", tags)){
+            return;
+        }
+
         Graphics2D g1 = (Graphics2D)g.create();
 
         Polygon p=new Polygon();
@@ -665,6 +709,12 @@ public class OSMDrawer {
     public void drawNatural(List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g){
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
+        if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "natural", tags)){
+            return;
+        }
+
         Graphics2D g1 = (Graphics2D)g.create();
 
         Polygon p=new Polygon();
