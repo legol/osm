@@ -7,6 +7,7 @@ import com.heaven.osm.imagegenerator.model.PathFinderResultPoint;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
@@ -58,14 +59,16 @@ public class PathDrawer implements PathFinderObserver{
         BasicStroke pathStroke = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
         g1.setStroke(pathStroke);
 
-        double deltaLongitude = boundingBox.maxlon - boundingBox.minlon;
-        double deltaLatitude = boundingBox.maxlat - boundingBox.minlat;
-        for (int i = 0; i + 1 < points.size(); i++){
-            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i).geoPoint, boundingBox, imageWidth, imageHeight);
-            GraphicsPoint p2 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i + 1).geoPoint, boundingBox, imageWidth, imageHeight);
+        GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
 
-            g1.drawLine(p1.x, p1.y, p2.x, p2.y);
+        GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0).geoPoint, boundingBox, imageWidth, imageHeight);
+        polyline.moveTo(p0.x, p0.y);
+        for (int i = 1; i < points.size(); i++){
+            GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i).geoPoint, boundingBox, imageWidth, imageHeight);
+            polyline.lineTo(p.x, p.y);
         }
+
+        g1.draw(polyline);
     }
 
     @Override
