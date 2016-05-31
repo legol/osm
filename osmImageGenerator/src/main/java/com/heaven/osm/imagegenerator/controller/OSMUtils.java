@@ -120,4 +120,16 @@ public class OSMUtils {
         double dpi = Toolkit.getDefaultToolkit().getScreenResolution();
         return (millimeters * dpi) / 25.4;
     }
+
+    // returns the distance(in meters) represented by 1 centimeter(10mm).
+    public static double calcScale(double minlon, double maxlon, double lat, int imageWidth){
+        double distance = OSMUtils.distance(lat, lat,
+                minlon, maxlon,
+                0, 0); // distance in meters
+        double pixels = imageWidth;
+        double mm = OSMUtils.millimetersFromPixels(pixels);
+        double scale = distance / mm * 10; // the real distance represented by 1cm
+
+        return scale;
+    }
 }

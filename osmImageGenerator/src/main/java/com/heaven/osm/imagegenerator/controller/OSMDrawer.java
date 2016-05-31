@@ -263,17 +263,12 @@ public class OSMDrawer {
     public void drawHighway(List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g, int layer){
-        double distance = OSMUtils.distance(boundingBox.minlat, boundingBox.minlat,
-                boundingBox.minlon, boundingBox.maxlon,
-                0, 0); // distance in meters
-        double pixels = imageWidth;
-        double mm = OSMUtils.millimetersFromPixels(pixels);
-        double ruler = distance / mm * 10; // the real distance represented by 1cm
 
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
         int wayWidth1 = 22;
         int wayWidth2 = 8;
         int wayWidth3 = 4;
-        if (ruler >= 100){
+        if (scale >= 100){
             wayWidth1 = 8;
             wayWidth2 = 6;
             wayWidth3 = 3;
@@ -396,17 +391,12 @@ public class OSMDrawer {
     public void drawHighwayLink(List<GeomPoint> points, List<Pair<String, String>> tags,
                                 GeomBox boundingBox, int imageWidth, int imageHeight,
                                 Graphics2D g, int layer){
-        double distance = OSMUtils.distance(boundingBox.minlat, boundingBox.minlat,
-                boundingBox.minlon, boundingBox.maxlon,
-                0, 0); // distance in meters
-        double pixels = imageWidth;
-        double mm = OSMUtils.millimetersFromPixels(pixels);
-        double ruler = distance / mm * 10; // the real distance represented by 1cm
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
 
         int wayWidth1 = 16;
         int wayWidth2 = 8;
         int wayWidth3 = 4;
-        if (ruler >= 100){
+        if (scale >= 100){
             wayWidth1 = 8;
             wayWidth2 = 6;
             wayWidth3 = 2;
