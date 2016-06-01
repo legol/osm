@@ -190,33 +190,25 @@ public class LevelOfDetailController {
         item.shouldDraw = false;
         item.needFurtherCalc = false;
         lod75.add(item);
+
+        item = new LodItem();
+        item.lod = 75;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "cycleway");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod75.add(item);
+
+        item = new LodItem();
+        item.lod = 75;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "footway");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod75.add(item);
     }
 
     public boolean shouldDrawFurtherCalc(LodItem matchedLodItem, String category, List<Pair<String, String>> tags){
-
-        if (matchedLodItem.lod == 95){
-
-        }
-        else if (matchedLodItem.lod == 90) {
-            if (category.compareToIgnoreCase("other") == 0){
-                return false;
-            }
-        }
-        else if (matchedLodItem.lod == 85) {
-            if (category.compareToIgnoreCase("other") == 0){
-                return false;
-            }
-        }
-        else if (matchedLodItem.lod == 80) {
-            if (category.compareToIgnoreCase("other") == 0){
-                return false;
-            }
-        }
-        else if (matchedLodItem.lod == 75) {
-            if (category.compareToIgnoreCase("other") == 0){
-                return false;
-            }
-        }
         return true;
     }
 
@@ -252,7 +244,7 @@ public class LevelOfDetailController {
 
     public int determinLod(double scale/* meters in one centimeter */){
 
-        return 95;
+        return 75;
 //        if (scale >=100 ){
 //            return 75;
 //        }
