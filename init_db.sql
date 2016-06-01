@@ -2,6 +2,9 @@ DROP TABLE IF EXISTS "relation_bounding_box";
 DROP TABLE IF EXISTS "way_bounding_box";
 DROP TABLE IF EXISTS "top_level_relation";
 
+DROP INDEX IF EXISTS "way_bounding_box_idx";
+DROP INDEX IF EXISTS "relation_bounding_box_idx";
+
 DROP INDEX IF EXISTS "relation_member_relation_ref";
 DROP INDEX IF EXISTS "relation_tag_relation_ref";
 DROP INDEX IF EXISTS "relation_member_type";
@@ -121,9 +124,11 @@ CREATE TABLE "way_bounding_box"(
 	"minlon" float(32),
 	"maxlat" float(32),
 	"maxlon" float(32),
+	"wgs84_bounding_box" geometry NOT NULL,	
 	PRIMARY KEY("way_ref"),
 	FOREIGN KEY ("way_ref") REFERENCES "way"("id") ON DELETE CASCADE
 );
+CREATE INDEX "way_bounding_box_idx" ON "way_bounding_box" USING GIST ("wgs84_bounding_box");
 
 
 CREATE TABLE "relation_bounding_box"(
@@ -132,9 +137,11 @@ CREATE TABLE "relation_bounding_box"(
 	"minlon" float(32),
 	"maxlat" float(32),
 	"maxlon" float(32),
+	"wgs84_bounding_box" geometry NOT NULL,	
 	PRIMARY KEY("relation_ref"),
 	FOREIGN KEY ("relation_ref") REFERENCES "relation"("id") ON DELETE CASCADE
 );
+CREATE INDEX "relation_bounding_box_idx" ON "relation_bounding_box" USING GIST ("wgs84_bounding_box");
 
 
 CREATE TABLE "top_level_relation"(

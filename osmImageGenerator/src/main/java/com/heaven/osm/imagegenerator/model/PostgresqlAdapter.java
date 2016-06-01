@@ -104,12 +104,20 @@ public class PostgresqlAdapter {
         try {
             conn = cpds.getConnection();
 
-            statement = conn.prepareStatement("select way_ref from way_bounding_box where not(? < minlat or ? < minlon or maxlat < ? or maxlon < ?)");
+            // not index-ed query, slower
+//            statement = conn.prepareStatement("select way_ref from way_bounding_box where not(? < minlat or ? < minlon or maxlat < ? or maxlon < ?)");
+//            statement.setDouble(1, boundingBox.maxlat);
+//            statement.setDouble(2, boundingBox.maxlon);
+//            statement.setDouble(3, boundingBox.minlat);
+//            statement.setDouble(4, boundingBox.minlon);
 
-            statement.setDouble(1, boundingBox.maxlat);
-            statement.setDouble(2, boundingBox.maxlon);
-            statement.setDouble(3, boundingBox.minlat);
-            statement.setDouble(4, boundingBox.minlon);
+            // index-ed query, faster
+            statement = conn.prepareStatement("select way_ref from way_bounding_box where " +
+                    "wgs84_bounding_box && ST_SetSRID(ST_MakeLine(ST_MakePoint(?, ?), ST_MakePoint(?, ?)), 4326)");
+            statement.setDouble(1, boundingBox.minlon);
+            statement.setDouble(2, boundingBox.maxlat);
+            statement.setDouble(3, boundingBox.maxlon);
+            statement.setDouble(4, boundingBox.minlat);
 
             rs = statement.executeQuery();
             while (rs.next()){

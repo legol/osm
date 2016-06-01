@@ -465,13 +465,22 @@ public class PostgresqlAdapter {
             conn.setAutoCommit(false); // make sure the node and its tags are inserted in the same time.
 
             // save bounding_box
-            statement = conn.prepareStatement("insert into relation_bounding_box(relation_ref, minlon, minlat, maxlon, maxlat) values (?, ?, ?, ?, ?)");
+            statement = conn.prepareStatement("insert into relation_bounding_box(relation_ref, minlon, minlat, maxlon, maxlat, wgs84_bounding_box) values (?, ?, ?, ?, ?, ST_SetSRID(ST_MakeLine(ST_MakePoint(?, ?), ST_MakePoint(?, ?)), 4326))");
 
             statement.setLong(1, relation_ref);
             statement.setDouble(2, boundingBox.minlon);
             statement.setDouble(3, boundingBox.minlat);
             statement.setDouble(4, boundingBox.maxlon);
             statement.setDouble(5, boundingBox.maxlat);
+
+            // top left
+            statement.setDouble(6, boundingBox.minlon);
+            statement.setDouble(7, boundingBox.maxlat);
+
+            // right bottom
+            statement.setDouble(8, boundingBox.maxlon);
+            statement.setDouble(9, boundingBox.minlat);
+
 
             int rowsAffacted = statement.executeUpdate();
             if (rowsAffacted == 0) {
@@ -624,13 +633,21 @@ public class PostgresqlAdapter {
             conn.setAutoCommit(false); // make sure the node and its tags are inserted in the same time.
 
             // save bounding_box
-            statement = conn.prepareStatement("insert into way_bounding_box(way_ref, minlon, minlat, maxlon, maxlat) values (?, ?, ?, ?, ?)");
+            statement = conn.prepareStatement("insert into way_bounding_box(way_ref, minlon, minlat, maxlon, maxlat, wgs84_bounding_box) values (?, ?, ?, ?, ?, ST_SetSRID(ST_MakeLine(ST_MakePoint(?, ?), ST_MakePoint(?, ?)), 4326))");
 
             statement.setLong(1, way_ref);
             statement.setDouble(2, boundingBox.minlon);
             statement.setDouble(3, boundingBox.minlat);
             statement.setDouble(4, boundingBox.maxlon);
             statement.setDouble(5, boundingBox.maxlat);
+
+            // top left
+            statement.setDouble(6, boundingBox.minlon);
+            statement.setDouble(7, boundingBox.maxlat);
+
+            // right bottom
+            statement.setDouble(8, boundingBox.maxlon);
+            statement.setDouble(9, boundingBox.minlat);
 
             int rowsAffacted = statement.executeUpdate();
             if (rowsAffacted == 0) {

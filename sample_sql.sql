@@ -92,3 +92,10 @@ select way_ref, ST_Centroid(ST_MakeLine(wgs84long_lat)) from
 left join node
 on landuse.nd_ref=node.id
 group by way_ref
+
+
+-- indexed way bounding box
+insert into way_bounding_box(way_ref, minlon, minlat, maxlon, maxlat, wgs84_bounding_box) values (4231222, 1, 2, 3, 4, ST_SetSRID(ST_MakeLine(ST_MakePoint(1, 4), ST_MakePoint(3, 2)), 4326))
+
+-- indexed query, much faster
+select relation_ref, minlat, minlon, maxlat, maxlon, st_astext(wgs84_bounding_box) from relation_bounding_box where wgs84_bounding_box && ST_SetSRID(ST_MakeLine(ST_MakePoint(116.3731852, 39.8752726), ST_MakePoint(116.380653, 39.8705841)), 4326)
