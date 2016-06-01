@@ -1,12 +1,11 @@
 package com.heaven.osm.imagegenerator.controller;
 
 import com.heaven.osm.imagegenerator.model.*;
+import com.heaven.osm.imagegenerator.model.style.*;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
 import java.util.*;
 import java.util.List;
 
@@ -25,6 +24,9 @@ public class OSMDrawer {
     }
 
     public void drawOSM(GeomBox boundingBox, int imageWidth, int imageHeight, Graphics2D g){
+
+        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
+        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
 
         LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers = new LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>>();
         for (int i = -5; i <= 5; i++){
@@ -47,17 +49,16 @@ public class OSMDrawer {
 
         List<Long> ways = PostgresqlAdapter.sharedInstance().getWaysByBoundingBox(boundingBox);
         for (int i = 0; i < ways.size(); i++){
-            drawWay(ways.get(i).longValue(),
-                    boundingBox, imageWidth, imageHeight,
-                    g,
-                    allLayers);
+            categorizeWay(ways.get(i).longValue(),
+                        boundingBox, imageWidth, imageHeight,
+                        allLayers);
         }
 
         // real drawing goes here
-        drawLayers(allLayers, boundingBox, imageWidth, imageHeight, g);
+        drawLayers(lod, allLayers, boundingBox, imageWidth, imageHeight, g);
     }
 
-    public void drawLayers(LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers,
+    public void drawLayers(int lod, LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers,
                            GeomBox boundingBox, int imageWidth, int imageHeight, Graphics2D g){
 
         Graphics2D g1 = (Graphics2D)g.create();
@@ -73,28 +74,28 @@ public class OSMDrawer {
 
             elements = layers.get("layer_land");
             for (int i = 0; i < elements.size(); i++){
-                drawLand(elements.get(i).points, elements.get(i).tags,
+                drawLand(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g);
             }
 
             elements = layers.get("layer_natural");
             for (int i = 0; i < elements.size(); i++){
-                drawNatural(elements.get(i).points, elements.get(i).tags,
+                drawNatural(lod, elements.get(i).points, elements.get(i).tags,
                             boundingBox, imageWidth, imageHeight,
                             g);
             }
 
             elements = layers.get("layer_building");
             for (int i = 0; i < elements.size(); i++){
-                drawBuilding(elements.get(i).points, elements.get(i).tags,
+                drawBuilding(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g);
             }
 
             elements = layers.get("layer_water");
             for (int i = 0; i < elements.size(); i++){
-                drawWater(elements.get(i).points, elements.get(i).tags,
+                drawWater(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g);
             }
@@ -102,54 +103,54 @@ public class OSMDrawer {
             // highwayline_edge -> highway_edge -> highwayline_inner -> highway_inner
             elements = layers.get("layer_highway_link");
             for (int i = 0; i < elements.size(); i++){
-                drawHighwayLink(elements.get(i).points, elements.get(i).tags,
+                drawHighwayLink(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g, 0);
             }
 
             elements = layers.get("layer_highway");
             for (int i = 0; i < elements.size(); i++){
-                drawHighway(elements.get(i).points, elements.get(i).tags,
+                drawHighway(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g, 0);
             }
 
             elements = layers.get("layer_highway_link");
             for (int i = 0; i < elements.size(); i++){
-                drawHighwayLink(elements.get(i).points, elements.get(i).tags,
+                drawHighwayLink(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g, 1);
             }
 
             elements = layers.get("layer_highway");
             for (int i = 0; i < elements.size(); i++){
-                drawHighway(elements.get(i).points, elements.get(i).tags,
+                drawHighway(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g, 1);
             }
 
             elements = layers.get("layer_rail");
             for (int i = 0; i < elements.size(); i++){
-                drawRail(elements.get(i).points, elements.get(i).tags,
+                drawRail(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g, 0);
             }
             for (int i = 0; i < elements.size(); i++){
-                drawRail(elements.get(i).points, elements.get(i).tags,
+                drawRail(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g, 1);
             }
 
             elements = layers.get("layer_other");
             for (int i = 0; i < elements.size(); i++){
-                drawOther(elements.get(i).points, elements.get(i).tags,
+                drawOther(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g);
             }
 
             elements = layers.get("layer_boundary");
             for (int i = 0; i < elements.size(); i++){
-                drawBoundary(elements.get(i).points, elements.get(i).tags,
+                drawBoundary(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g);
             }
@@ -165,7 +166,7 @@ public class OSMDrawer {
 
             elements = layers.get("layer_tag");
             for (int i = 0; i < elements.size(); i++) {
-                drawTags(elements.get(i).points, elements.get(i).tags,
+                drawTags(lod, elements.get(i).points, elements.get(i).tags,
                         boundingBox, imageWidth, imageHeight,
                         g,
                         tagDrawer);
@@ -197,10 +198,9 @@ public class OSMDrawer {
         g1.drawString(element.debugInfo, p.x, p.y);
     }
 
-    public void drawWay(long way,
-                        GeomBox boundingBox, int imageWidth, int imageHeight,
-                        Graphics2D g,
-                        LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers){
+    public void categorizeWay(long way,
+                            GeomBox boundingBox, int imageWidth, int imageHeight,
+                            LinkedList<HashMap<String, LinkedList<GraphicsLayerElement>>> allLayers){
         List<GeomPoint> points = PostgresqlAdapter.sharedInstance().getPointsOfWay(way);
         List<Pair<String, String>> tags = PostgresqlAdapter.sharedInstance().getTags("way", way);
 
@@ -260,126 +260,25 @@ public class OSMDrawer {
         }
     }
 
-    public void drawHighway(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawHighway(int lod,
+                            List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g, int layer){
-
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "highway", tags)){
             return;
         }
 
-        int wayWidth1 = 22;
-        int wayWidth2 = 8;
-        int wayWidth3 = 4;
-        if (lod < 100 && lod >= 85){
-            wayWidth1 = 8;
-            wayWidth2 = 6;
-            wayWidth3 = 3;
-        }
-        else if (lod < 85 && lod >= 70){
-            wayWidth1 = 5;
-            wayWidth2 = 3;
-            wayWidth3 = 2;
-        }
-
-
         String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
-
-        Graphics2D g1 = (Graphics2D) g.create();
-
-        BasicStroke edgeStroke = null;
-        BasicStroke innerStroke = null;
-        Color edgeClr = null;
-        Color innerClr = null;
-
-        if (highwayValue.compareToIgnoreCase("motorway") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(221, 41, 108);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr = new Color(232, 143, 161);
-        }
-        else if (highwayValue.compareToIgnoreCase("trunk") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(203, 81, 52);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(249, 177, 156);
-        }
-        else if (highwayValue.compareToIgnoreCase("primary") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 123, 26);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(252, 214, 164);
-        }
-        else if (highwayValue.compareToIgnoreCase("secondary") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(124, 137, 23);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(246, 250, 190);
-        }
-        else if (highwayValue.compareToIgnoreCase("tertiary") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 173, 173);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(254, 254, 254);
-        }
-        else if (highwayValue.compareToIgnoreCase("cycleway") == 0 || highwayValue.compareToIgnoreCase("footway") == 0){
-            edgeStroke = null;
-            edgeClr = null;
-            innerStroke = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[]{9}, 0);
-            innerClr = new Color(123, 121, 247);
-        }
-        else if (highwayValue.compareToIgnoreCase("living_street") == 0){
-            edgeStroke = null;
-            edgeClr = null;
-            innerStroke = new BasicStroke(wayWidth3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(255, 255, 255);
-        }
-        else if (highwayValue.compareToIgnoreCase("service") == 0){
-            edgeStroke = new BasicStroke(wayWidth3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 173, 173);
-            innerStroke = new BasicStroke(wayWidth3 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(254, 254, 254);
-        }
-        else{
-            edgeStroke = new BasicStroke(wayWidth2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 173, 173);
-            innerStroke = new BasicStroke(wayWidth2 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(254, 254, 254);
-        }
+        HighwayStyle highwayStyle = StyleBuilder.sharedInstance().createHighwayStyle(lod, highwayValue);
 
         if (layer == 0){
-            if (edgeStroke != null && edgeClr != null){
-                g1.setStroke(edgeStroke);
-                g1.setColor(edgeClr);
-
-                GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-
-                GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-                polyline.moveTo(p0.x, p0.y);
-                for (int i = 1; i < points.size(); i++){
-                    GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-                    polyline.lineTo(p.x, p.y);
-                }
-
-                g1.draw(polyline);
+            if (highwayStyle.edgeStroke != null && highwayStyle.edgeClr != null){
+                OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, highwayStyle.edgeStroke, highwayStyle.edgeClr);
             }
         }
         else if (layer == 1){
-
-            if (innerStroke != null && innerClr != null){
-                g1.setStroke(innerStroke);
-                g1.setColor(innerClr);
-                GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-                GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-                polyline.moveTo(p0.x, p0.y);
-                for (int i = 1; i < points.size(); i++){
-                    GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-
-                    polyline.lineTo(p.x, p.y);
-                }
-                g1.draw(polyline);
+            if (highwayStyle.innerStroke != null && highwayStyle.innerClr != null){
+                OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, highwayStyle.innerStroke, highwayStyle.innerClr);
             }
         }
 
@@ -393,100 +292,25 @@ public class OSMDrawer {
 //        }
     }
 
-    public void drawCenteredCircle(Graphics2D g, int x, int y, int r) {
-        x = x-(r/2);
-        y = y-(r/2);
-        g.fillOval(x,y,r,r);
-    }
-
-    public void drawHighwayLink(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawHighwayLink(int lod,
+                                List<GeomPoint> points, List<Pair<String, String>> tags,
                                 GeomBox boundingBox, int imageWidth, int imageHeight,
                                 Graphics2D g, int layer){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "highway_link", tags)){
             return;
         }
 
-        int wayWidth1 = 16;
-        int wayWidth2 = 8;
-        int wayWidth3 = 4;
-        if (scale >= 100){
-            wayWidth1 = 8;
-            wayWidth2 = 6;
-            wayWidth3 = 2;
-        }
-
         String highwayValue = OSMUtils.sharedInstance().tagValue(tags, "highway");
-
-        Graphics2D g1 = (Graphics2D) g.create();
-
-        BasicStroke edgeStroke = null;
-        BasicStroke innerStroke = null;
-        Color edgeClr = null;
-        Color innerClr = null;
-
-        if (highwayValue.compareToIgnoreCase("motorway_link") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(221, 41, 108);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr = new Color(232, 143, 161);
-        }
-        else if (highwayValue.compareToIgnoreCase("trunk_link") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(203, 81, 52);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(249, 177, 156);
-        }
-        else if (highwayValue.compareToIgnoreCase("primary_link") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 123, 26);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(252, 214, 164);
-        }
-        else if (highwayValue.compareToIgnoreCase("secondary_link") == 0){
-            edgeStroke = new BasicStroke(wayWidth1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(124, 137, 23);
-            innerStroke = new BasicStroke(wayWidth1 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(246, 250, 190);
-        }
-        else{
-            edgeStroke = new BasicStroke(wayWidth2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = new Color(173, 173, 173);
-            innerStroke = new BasicStroke(wayWidth2 - 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr =  new Color(254, 254, 254);
-        }
+        HighwayLinkStyle style = StyleBuilder.sharedInstance().createHighwayLinkStyle(lod, highwayValue);
 
         if (layer == 0){
-            if (edgeStroke != null && edgeClr != null){
-                g1.setStroke(edgeStroke);
-                g1.setColor(edgeClr);
-
-                GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-
-                GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-                polyline.moveTo(p0.x, p0.y);
-                for (int i = 1; i < points.size(); i++){
-                    GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-                    polyline.lineTo(p.x, p.y);
-                }
-
-                g1.draw(polyline);
+            if (style.edgeStroke != null && style.edgeClr != null){
+                OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, style.edgeStroke, style.edgeClr);
             }
         }
         else if (layer == 1){
-            if (innerStroke != null && innerClr != null){
-                g1.setStroke(innerStroke);
-                g1.setColor(innerClr);
-                GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-                GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-                polyline.moveTo(p0.x, p0.y);
-                for (int i = 1; i < points.size(); i++){
-                    GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-
-                    polyline.lineTo(p.x, p.y);
-                }
-                g1.draw(polyline);
+            if (style.innerStroke != null && style.innerClr != null){
+                OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, style.innerStroke, style.innerClr);
             }
         }
 
@@ -501,246 +325,111 @@ public class OSMDrawer {
     }
 
 
-    public void drawRail(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawRail(int lod,
+                         List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g, int layer){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "rail", tags)){
             return;
         }
 
         String railValue = OSMUtils.sharedInstance().tagValue(tags, "railway");
         if (railValue != null && railValue.compareToIgnoreCase("subway") == 0){
-            Graphics2D g1 = (Graphics2D) g.create();
 
-            BasicStroke edgeStroke = null;
-            BasicStroke innerStroke = null;
-            Color edgeClr = null;
-            Color innerClr = null;
-
-            edgeStroke = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            edgeClr = Color.black;
-            innerStroke = new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            innerClr = new Color(153, 153, 153);
-
+            RailStyle style = StyleBuilder.sharedInstance().createRailStyle(lod, railValue);
             if (layer == 0){
-                if (edgeStroke != null && edgeClr != null){
-                    g1.setStroke(edgeStroke);
-                    g1.setColor(edgeClr);
-
-                    GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-
-                    GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-                    polyline.moveTo(p0.x, p0.y);
-                    for (int i = 1; i < points.size(); i++){
-                        GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-                        polyline.lineTo(p.x, p.y);
-                    }
-
-                    g1.draw(polyline);
+                if (style.edgeStroke != null && style.edgeClr != null){
+                    OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, style.edgeStroke, style.edgeClr);
                 }
             }
             else if (layer == 1){
-                if (innerStroke != null && innerClr != null){
-                    g1.setStroke(innerStroke);
-                    g1.setColor(innerClr);
-                    GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-                    GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-                    polyline.moveTo(p0.x, p0.y);
-                    for (int i = 1; i < points.size(); i++){
-                        GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-
-                        polyline.lineTo(p.x, p.y);
-                    }
-                    g1.draw(polyline);
+                if (style.innerStroke != null && style.innerClr != null){
+                    OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, style.innerStroke, style.innerClr);
                 }
             }
         }
     }
 
-    public void drawBoundary(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawBoundary(int lod,
+                             List<GeomPoint> points, List<Pair<String, String>> tags,
                                 GeomBox boundingBox, int imageWidth, int imageHeight,
                                 Graphics2D g){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "boundary", tags)){
             return;
         }
 
-        Graphics2D g1 = (Graphics2D) g.create();
-
         Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{ 21.0f, 9.0f, 3.0f, 9.0f }, 0);
-        g1.setStroke(dashed);
-        g1.setColor(new Color(206, 154, 202));
-
-        GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-        GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-        polyline.moveTo(p0.x, p0.y);
-        for (int i = 1; i < points.size(); i++){
-            GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-
-            polyline.lineTo(p.x, p.y);
-        }
-        g1.draw(polyline);
+        OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, dashed, new Color(206, 154, 202));
     }
 
-    public void drawOther(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawOther(int lod,
+                          List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "other", tags)){
             return;
         }
 
-        Graphics2D g1 = (Graphics2D)g.create();
-
-        g1.setColor(Color.white);
-
-        GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-        GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-        polyline.moveTo(p0.x, p0.y);
-        for (int i = 1; i < points.size(); i++){
-            GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-
-            polyline.lineTo(p.x, p.y);
-        }
-        g1.draw(polyline);
+        OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, new BasicStroke(1), Color.lightGray);
     }
 
-    public void drawBuilding(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawBuilding(int lod,
+                             List<GeomPoint> points, List<Pair<String, String>> tags,
                              GeomBox boundingBox, int imageWidth, int imageHeight,
                              Graphics2D g){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "building", tags)){
             return;
         }
 
-        Graphics2D g1 = (Graphics2D)g.create();
-
-        Polygon p=new Polygon();
-
-        for (int i = 0; i < points.size(); i++){
-            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-            p.addPoint(p1.x, p1.y);
-        }
-
-        g1.setColor(new Color(216, 208, 197));
-        g1.fillPolygon(p);
-
-        g1.setColor(new Color(198, 186, 177));
-        g1.draw(p);
+        BuildingStyle style = StyleBuilder.sharedInstance().createBuildingStyle(lod);
+        OSMUtils.sharedInstance().drawGeomPolygon(points, boundingBox, imageWidth, imageHeight, g, style.edgeStroke, style.edgeClr, style.innerStroke, style.innerClr);
     }
 
-    public void drawWater(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawWater(int lod,
+                          List<GeomPoint> points, List<Pair<String, String>> tags,
                          GeomBox boundingBox, int imageWidth, int imageHeight,
                          Graphics2D g){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "water", tags)){
             return;
         }
 
-        Graphics2D g1 = (Graphics2D) g.create();
-
-        g1.setColor(new Color(181, 208, 208));
+        WaterStyle style = StyleBuilder.sharedInstance().createWaterStyle(lod);
 
         String waterValue = OSMUtils.sharedInstance().tagValue(tags, "waterway");
         if (waterValue != null && waterValue.compareToIgnoreCase("riverbank") == 0){
-            Polygon p=new Polygon();
-
-            for (int i = 0; i < points.size(); i++){
-                GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-                p.addPoint(p1.x, p1.y);
-            }
-
-            g1.fillPolygon(p);
+            OSMUtils.sharedInstance().drawGeomPolygon(points, boundingBox, imageWidth, imageHeight, g, style.edgeStroke, style.edgeClr, style.innerStroke, style.innerClr);
         }else{
-            BasicStroke wideStroke = new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-            g1.setStroke(wideStroke);
-
-            GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
-            GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
-            polyline.moveTo(p0.x, p0.y);
-            for (int i = 1; i < points.size(); i++){
-                GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-
-                polyline.lineTo(p.x, p.y);
-            }
-            g1.draw(polyline);
+            OSMUtils.sharedInstance().drawGeomPolyline(points, boundingBox, imageWidth, imageHeight, g, style.innerStroke, style.innerClr);
         }
     }
 
-    public void drawLand(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawLand(int lod,
+                         List<GeomPoint> points, List<Pair<String, String>> tags,
                              GeomBox boundingBox, int imageWidth, int imageHeight,
                              Graphics2D g){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "land", tags)){
             return;
         }
 
-        Graphics2D g1 = (Graphics2D)g.create();
-
-        Polygon p=new Polygon();
-
-        for (int i = 0; i < points.size(); i++){
-            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-            p.addPoint(p1.x, p1.y);
-        }
-
-        if (OSMUtils.sharedInstance().isLeisure(tags)){
-            g1.setColor(new Color(97, 240, 19)); // green
-        }else if (OSMUtils.sharedInstance().isAmenity(tags)){
-            g1.setColor(new Color(246, 249, 190)); // light green
-        } else {
-            String landValue = OSMUtils.sharedInstance().tagValue(tags, "landuse");
-            if (landValue != null &&
-                    (landValue.compareToIgnoreCase("basin") == 0 || landValue.compareToIgnoreCase("reservoir") == 0)){
-                g1.setColor(new Color(181, 208, 208)); // must be same with waterway
-            } else {
-                g1.setColor(new Color(224, 222, 222)); // grey
-            }
-        }
-        g1.fillPolygon(p);
-
-        Stroke landEdge = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-        g1.setColor(new Color(180, 180, 178));
-        g1.draw(p);
+        LandStyle style = StyleBuilder.sharedInstance().createLandStyle(lod, tags);
+        OSMUtils.sharedInstance().drawGeomPolygon(points, boundingBox, imageWidth, imageHeight, g, style.edgeStroke, style.edgeClr, style.innerStroke, style.innerClr);
     }
 
-    public void drawNatural(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawNatural(int lod,
+                            List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g){
-        double scale = OSMUtils.calcScale(boundingBox.minlon, boundingBox.maxlon, boundingBox.minlat, imageWidth);
-        int lod = LevelOfDetailController.sharedInstance().determinLod(scale);
         if(!LevelOfDetailController.sharedInstance().shouldDraw(lod, "natural", tags)){
             return;
         }
 
-        Graphics2D g1 = (Graphics2D)g.create();
-
-        Polygon p=new Polygon();
-
-        for (int i = 0; i < points.size(); i++){
-            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
-            p.addPoint(p1.x, p1.y);
-        }
-
-        String naturalValue = OSMUtils.sharedInstance().tagValue(tags, "natural");
-        if (naturalValue != null && naturalValue.compareToIgnoreCase("water") == 0){
-            g1.setColor(new Color(181, 208, 208)); // must be same with waterway
-        } else {
-            g1.setColor(new Color(199, 228, 182));
-        }
-
-        g1.fillPolygon(p);
+        NaturalStyle style = StyleBuilder.sharedInstance().createNaturalStyle(lod, tags);
+        OSMUtils.sharedInstance().drawGeomPolygon(points, boundingBox, imageWidth, imageHeight, g, style.edgeStroke, style.edgeClr, style.innerStroke, style.innerClr);
     }
 
 
-    public void drawTags(List<GeomPoint> points, List<Pair<String, String>> tags,
+    public void drawTags(int lod,
+                         List<GeomPoint> points, List<Pair<String, String>> tags,
                             GeomBox boundingBox, int imageWidth, int imageHeight,
                             Graphics2D g,
                             TagDrawer tagDrawer){

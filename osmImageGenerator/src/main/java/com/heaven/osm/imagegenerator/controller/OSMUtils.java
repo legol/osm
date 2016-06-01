@@ -7,6 +7,7 @@ import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,6 +25,12 @@ public class OSMUtils {
         return instance;
     }
 
+    public void drawCenteredCircle(Graphics2D g, int x, int y, int r) {
+        x = x-(r/2);
+        y = y-(r/2);
+        g.fillOval(x,y,r,r);
+    }
+
     public GraphicsPoint GeomPoint2GraphicsPoint(GeomPoint geomPoint, GeomBox boundingBox, int imageWidth, int imageHeight){
         GraphicsPoint point = new GraphicsPoint();
 
@@ -31,6 +38,47 @@ public class OSMUtils {
         point.y = (int)Math.round(imageHeight - imageHeight * (geomPoint.latitude - boundingBox.minlat) / (boundingBox.maxlat - boundingBox.minlat));
 
         return point;
+    }
+
+    public void drawGeomPolygon(List<GeomPoint> points, GeomBox boundingBox, int imageWidth, int imageHeight,
+                                Graphics2D g, Stroke edgeStroke, Color edgeClr, Stroke innerStroke, Color innerClr){
+        Graphics2D g1 = (Graphics2D) g.create();
+
+        Polygon p = new Polygon();
+        for (int i = 0; i < points.size(); i++){
+            GraphicsPoint p1 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+            p.addPoint(p1.x, p1.y);
+        }
+
+        if (innerClr != null && innerStroke != null){
+            g1.setStroke(innerStroke);
+            g1.setColor(innerClr);
+            g1.fillPolygon(p);
+        }
+
+        if (edgeClr != null && edgeStroke != null){
+            g1.setStroke(edgeStroke);
+            g1.setColor(edgeClr);
+            g1.draw(p);
+        }
+    }
+
+
+    public void drawGeomPolyline(List<GeomPoint> points, GeomBox boundingBox, int imageWidth, int imageHeight, Graphics2D g, Stroke stroke, Color clr){
+        Graphics2D g1 = (Graphics2D) g.create();
+
+        g1.setStroke(stroke);
+        g1.setColor(clr);
+
+        GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.size());
+        GraphicsPoint p0 = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(0), boundingBox, imageWidth, imageHeight);
+        polyline.moveTo(p0.x, p0.y);
+        for (int i = 1; i < points.size(); i++){
+            GraphicsPoint p = OSMUtils.sharedInstance().GeomPoint2GraphicsPoint(points.get(i), boundingBox, imageWidth, imageHeight);
+
+            polyline.lineTo(p.x, p.y);
+        }
+        g1.draw(polyline);
     }
 
     public boolean isBuilding(List<Pair<String, String>> tags){

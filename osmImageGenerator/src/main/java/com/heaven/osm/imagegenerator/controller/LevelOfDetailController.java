@@ -40,6 +40,7 @@ public class LevelOfDetailController {
         levelOfDetailItems.put(90, new LinkedList<LodItem>());
         levelOfDetailItems.put(85, new LinkedList<LodItem>());
         levelOfDetailItems.put(80, new LinkedList<LodItem>());
+        levelOfDetailItems.put(75, new LinkedList<LodItem>());
 
         LodItem item = null;
 
@@ -155,6 +156,40 @@ public class LevelOfDetailController {
         item.shouldDraw = false;
         item.needFurtherCalc = false;
         lod80.add(item);
+
+        // 75  /////////////////////////////////////////////////////////////////////////////////
+        LinkedList<LodItem> lod75 = levelOfDetailItems.get(75);
+        item = new LodItem();
+        item.lod = 75;
+        item.category = "building";
+        item.tag = new Pair<String, String>("building", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod75.add(item);
+
+        item = new LodItem();
+        item.lod = 75;
+        item.category = "land";
+        item.tag = new Pair<String, String>("landuse", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod75.add(item);
+
+        item = new LodItem();
+        item.lod = 75;
+        item.category = "land";
+        item.tag = new Pair<String, String>("amenity", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod75.add(item);
+
+        item = new LodItem();
+        item.lod = 75;
+        item.category = "land";
+        item.tag = new Pair<String, String>("leisure", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod75.add(item);
     }
 
     public boolean shouldDrawFurtherCalc(LodItem matchedLodItem, String category, List<Pair<String, String>> tags){
@@ -173,6 +208,11 @@ public class LevelOfDetailController {
             }
         }
         else if (matchedLodItem.lod == 80) {
+            if (category.compareToIgnoreCase("other") == 0){
+                return false;
+            }
+        }
+        else if (matchedLodItem.lod == 75) {
             if (category.compareToIgnoreCase("other") == 0){
                 return false;
             }
@@ -211,12 +251,14 @@ public class LevelOfDetailController {
     }
 
     public int determinLod(double scale/* meters in one centimeter */){
-        if (scale >=100 ){
-            return 80;
-        }
-        else{
-            return 100;
-        }
+
+        return 95;
+//        if (scale >=100 ){
+//            return 75;
+//        }
+//        else{
+//            return 100;
+//        }
     }
 
 }
