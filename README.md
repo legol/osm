@@ -1,4 +1,4 @@
-# osm
+# osm -- Open Street Map
 
 what is this project?
 
