@@ -36,11 +36,20 @@ public class LevelOfDetailController {
 
     public LevelOfDetailController(){
         levelOfDetailItems = new HashMap<Integer, LinkedList<LodItem>>();
-        levelOfDetailItems.put(95, new LinkedList<LodItem>());
-        levelOfDetailItems.put(90, new LinkedList<LodItem>());
+        levelOfDetailItems.put(95, new LinkedList<LodItem>()); // no building
+        levelOfDetailItems.put(90, new LinkedList<LodItem>()); // no landuse, amenity, leisure
         levelOfDetailItems.put(85, new LinkedList<LodItem>());
         levelOfDetailItems.put(80, new LinkedList<LodItem>());
-        levelOfDetailItems.put(75, new LinkedList<LodItem>());
+        levelOfDetailItems.put(75, new LinkedList<LodItem>()); // no cycleway, footway
+
+        // TODO
+        levelOfDetailItems.put(70, new LinkedList<LodItem>()); // no any highway less than tertiary
+        levelOfDetailItems.put(65, new LinkedList<LodItem>()); // no tertiary
+        levelOfDetailItems.put(60, new LinkedList<LodItem>()); // no secondary
+        levelOfDetailItems.put(55, new LinkedList<LodItem>()); // no primary, only trunk and motorway
+        levelOfDetailItems.put(50, new LinkedList<LodItem>()); // no way at all. only province boundary, country boundary
+        levelOfDetailItems.put(45, new LinkedList<LodItem>()); // only country boundary
+        levelOfDetailItems.put(40, new LinkedList<LodItem>()); // only continent boundary
 
         LodItem item = null;
 
