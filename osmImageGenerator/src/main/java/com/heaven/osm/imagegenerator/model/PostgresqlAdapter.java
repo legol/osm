@@ -53,46 +53,6 @@ public class PostgresqlAdapter {
         return instance;
     }
 
-    // not used
-    public List<Long> getTopLevelRelationsByBoundingBox(GeomBox boundingBox){
-
-        List<Long> relations = new LinkedList<Long>();
-
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-
-        try {
-            conn = cpds.getConnection();
-
-            statement = conn.prepareStatement("select relation_ref from relation_bounding_box where not(? < minlat or ? < minlon or maxlat < ? or maxlon < ?) and " +
-                    " relation_ref in (select relation_ref from top_level_relation)");
-            statement.setDouble(1, boundingBox.maxlat);
-            statement.setDouble(2, boundingBox.maxlon);
-            statement.setDouble(3, boundingBox.minlat);
-            statement.setDouble(4, boundingBox.minlon);
-
-            rs = statement.executeQuery();
-            while (rs.next()){
-                relations.add(rs.getLong("relation_ref"));
-            }
-
-            statement.close();
-            conn.close();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-            try {
-                statement.close();
-                conn.close();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-        }
-
-        return relations;
-    }
-
     public List<Long> getWaysByBoundingBox(GeomBox boundingBox){
 
         List<Long> ways = new LinkedList<Long>();
@@ -230,6 +190,46 @@ public class PostgresqlAdapter {
 
             statement = conn.prepareStatement("select ref as relation_ref from relation_member where relation_ref=? and type='relation'");
             statement.setLong(1, relation);
+
+            rs = statement.executeQuery();
+            while (rs.next()){
+                relations.add(rs.getLong("relation_ref"));
+            }
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                statement.close();
+                conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return relations;
+    }
+
+    // not used
+    public List<Long> getTopLevelRelationsByBoundingBox(GeomBox boundingBox){
+
+        List<Long> relations = new LinkedList<Long>();
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            conn = cpds.getConnection();
+
+            statement = conn.prepareStatement("select relation_ref from relation_bounding_box where not(? < minlat or ? < minlon or maxlat < ? or maxlon < ?) and " +
+                    " relation_ref in (select relation_ref from top_level_relation)");
+            statement.setDouble(1, boundingBox.maxlat);
+            statement.setDouble(2, boundingBox.maxlon);
+            statement.setDouble(3, boundingBox.minlat);
+            statement.setDouble(4, boundingBox.minlon);
 
             rs = statement.executeQuery();
             while (rs.next()){
