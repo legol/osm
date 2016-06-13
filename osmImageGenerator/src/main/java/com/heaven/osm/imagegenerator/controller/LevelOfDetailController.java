@@ -36,13 +36,6 @@ public class LevelOfDetailController {
 
     public LevelOfDetailController(){
         levelOfDetailItems = new HashMap<Integer, LinkedList<LodItem>>();
-        levelOfDetailItems.put(95, new LinkedList<LodItem>()); // no building
-        levelOfDetailItems.put(90, new LinkedList<LodItem>()); // no landuse, amenity, leisure
-        levelOfDetailItems.put(85, new LinkedList<LodItem>());
-        levelOfDetailItems.put(80, new LinkedList<LodItem>());
-        levelOfDetailItems.put(75, new LinkedList<LodItem>()); // no cycleway, footway
-
-        // TODO
         levelOfDetailItems.put(70, new LinkedList<LodItem>()); // no any highway less than tertiary
         levelOfDetailItems.put(65, new LinkedList<LodItem>()); // no tertiary
         levelOfDetailItems.put(60, new LinkedList<LodItem>()); // no secondary
@@ -54,7 +47,9 @@ public class LevelOfDetailController {
         LodItem item = null;
 
         // 95  /////////////////////////////////////////////////////////////////////////////////
-        LinkedList<LodItem> lod95 = levelOfDetailItems.get(95);
+        // no building
+        LinkedList<LodItem> lod95 = new LinkedList<LodItem>();
+        levelOfDetailItems.put(95, lod95);
 
         item = new LodItem();
         item.lod = 95;
@@ -65,14 +60,9 @@ public class LevelOfDetailController {
         lod95.add(item);
 
         // 90  /////////////////////////////////////////////////////////////////////////////////
-        LinkedList<LodItem> lod90 = levelOfDetailItems.get(90);
-        item = new LodItem();
-        item.lod = 90;
-        item.category = "building";
-        item.tag = new Pair<String, String>("building", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod90.add(item);
+        // no landuse, amenity, leisure
+        LinkedList<LodItem> lod90 = (LinkedList<LodItem>)(lod95.clone());
+        levelOfDetailItems.put(90, lod90);
 
         item = new LodItem();
         item.lod = 90;
@@ -99,106 +89,19 @@ public class LevelOfDetailController {
         lod90.add(item);
 
         // 85  /////////////////////////////////////////////////////////////////////////////////
-        LinkedList<LodItem> lod85 = levelOfDetailItems.get(85);
-        item = new LodItem();
-        item.lod = 85;
-        item.category = "building";
-        item.tag = new Pair<String, String>("building", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod85.add(item);
-
-        item = new LodItem();
-        item.lod = 85;
-        item.category = "land";
-        item.tag = new Pair<String, String>("landuse", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod85.add(item);
-
-        item = new LodItem();
-        item.lod = 85;
-        item.category = "land";
-        item.tag = new Pair<String, String>("amenity", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod85.add(item);
-
-        item = new LodItem();
-        item.lod = 85;
-        item.category = "land";
-        item.tag = new Pair<String, String>("leisure", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod85.add(item);
+        // line thinner, controlled by StyleBuilder
+        LinkedList<LodItem> lod85 = (LinkedList<LodItem>)(lod90.clone());
+        levelOfDetailItems.put(85, lod85);
 
         // 80  /////////////////////////////////////////////////////////////////////////////////
-        LinkedList<LodItem> lod80 = levelOfDetailItems.get(80);
-        item = new LodItem();
-        item.lod = 80;
-        item.category = "building";
-        item.tag = new Pair<String, String>("building", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod80.add(item);
-
-        item = new LodItem();
-        item.lod = 80;
-        item.category = "land";
-        item.tag = new Pair<String, String>("landuse", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod80.add(item);
-
-        item = new LodItem();
-        item.lod = 80;
-        item.category = "land";
-        item.tag = new Pair<String, String>("amenity", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod80.add(item);
-
-        item = new LodItem();
-        item.lod = 80;
-        item.category = "land";
-        item.tag = new Pair<String, String>("leisure", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod80.add(item);
+        // single layered line, controlled by StyleBuilder
+        LinkedList<LodItem> lod80 = (LinkedList<LodItem>)(lod85.clone());
+        levelOfDetailItems.put(80, lod80);
 
         // 75  /////////////////////////////////////////////////////////////////////////////////
-        LinkedList<LodItem> lod75 = levelOfDetailItems.get(75);
-        item = new LodItem();
-        item.lod = 75;
-        item.category = "building";
-        item.tag = new Pair<String, String>("building", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod75.add(item);
-
-        item = new LodItem();
-        item.lod = 75;
-        item.category = "land";
-        item.tag = new Pair<String, String>("landuse", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod75.add(item);
-
-        item = new LodItem();
-        item.lod = 75;
-        item.category = "land";
-        item.tag = new Pair<String, String>("amenity", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod75.add(item);
-
-        item = new LodItem();
-        item.lod = 75;
-        item.category = "land";
-        item.tag = new Pair<String, String>("leisure", "*");
-        item.shouldDraw = false;
-        item.needFurtherCalc = false;
-        lod75.add(item);
+        // no cycleway, footway
+        LinkedList<LodItem> lod75 = (LinkedList<LodItem>)(lod80.clone());
+        levelOfDetailItems.put(75, lod75);
 
         item = new LodItem();
         item.lod = 75;
@@ -215,6 +118,36 @@ public class LevelOfDetailController {
         item.shouldDraw = false;
         item.needFurtherCalc = false;
         lod75.add(item);
+
+        // 70  /////////////////////////////////////////////////////////////////////////////////
+        // no cycleway, footway
+        LinkedList<LodItem> lod70 = (LinkedList<LodItem>)(lod75.clone());
+        levelOfDetailItems.put(70, lod70);
+
+        item = new LodItem();
+        item.lod = 70;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "unclassified");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod70.add(item);
+
+        item = new LodItem();
+        item.lod = 70;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "residential");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod70.add(item);
+
+        item = new LodItem();
+        item.lod = 70;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "service");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod70.add(item);
+
     }
 
     public boolean shouldDrawFurtherCalc(LodItem matchedLodItem, String category, List<Pair<String, String>> tags){
