@@ -36,13 +36,9 @@ public class LevelOfDetailController {
 
     public LevelOfDetailController(){
         levelOfDetailItems = new HashMap<Integer, LinkedList<LodItem>>();
-        levelOfDetailItems.put(70, new LinkedList<LodItem>()); // no any highway less than tertiary
-        levelOfDetailItems.put(65, new LinkedList<LodItem>()); // no tertiary
-        levelOfDetailItems.put(60, new LinkedList<LodItem>()); // no secondary
-        levelOfDetailItems.put(55, new LinkedList<LodItem>()); // no primary, only trunk and motorway
-        levelOfDetailItems.put(50, new LinkedList<LodItem>()); // no way at all. only province boundary, country boundary
-        levelOfDetailItems.put(45, new LinkedList<LodItem>()); // only country boundary
-        levelOfDetailItems.put(40, new LinkedList<LodItem>()); // only continent boundary
+//        levelOfDetailItems.put(50, new LinkedList<LodItem>()); // no way at all. only province boundary, country boundary
+//        levelOfDetailItems.put(45, new LinkedList<LodItem>()); // only country boundary
+//        levelOfDetailItems.put(40, new LinkedList<LodItem>()); // only continent boundary
 
         LodItem item = null;
 
@@ -88,6 +84,14 @@ public class LevelOfDetailController {
         item.needFurtherCalc = false;
         lod90.add(item);
 
+        item = new LodItem();
+        item.lod = 90;
+        item.category = "other";
+        item.tag = new Pair<String, String>("*", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod90.add(item);
+
         // 85  /////////////////////////////////////////////////////////////////////////////////
         // line thinner, controlled by StyleBuilder
         LinkedList<LodItem> lod85 = (LinkedList<LodItem>)(lod90.clone());
@@ -120,7 +124,7 @@ public class LevelOfDetailController {
         lod75.add(item);
 
         // 70  /////////////////////////////////////////////////////////////////////////////////
-        // no cycleway, footway
+        // no any highway less than tertiary
         LinkedList<LodItem> lod70 = (LinkedList<LodItem>)(lod75.clone());
         levelOfDetailItems.put(70, lod70);
 
@@ -148,6 +152,65 @@ public class LevelOfDetailController {
         item.needFurtherCalc = false;
         lod70.add(item);
 
+        // 65  /////////////////////////////////////////////////////////////////////////////////
+        // no tertiary
+        LinkedList<LodItem> lod65 = (LinkedList<LodItem>)(lod70.clone());
+        levelOfDetailItems.put(65, lod65);
+
+        item = new LodItem();
+        item.lod = 65;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "tertiary");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod65.add(item);
+
+        // 60  /////////////////////////////////////////////////////////////////////////////////
+        // no secondary
+        LinkedList<LodItem> lod60 = (LinkedList<LodItem>)(lod65.clone());
+        levelOfDetailItems.put(60, lod60);
+
+        item = new LodItem();
+        item.lod = 60;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "secondary");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod60.add(item);
+
+        // 55  /////////////////////////////////////////////////////////////////////////////////
+        // no primary
+        LinkedList<LodItem> lod55 = (LinkedList<LodItem>)(lod60.clone());
+        levelOfDetailItems.put(55, lod55);
+
+        item = new LodItem();
+        item.lod = 55;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "primary");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod55.add(item);
+
+        // 50  /////////////////////////////////////////////////////////////////////////////////
+        // no way at all
+        LinkedList<LodItem> lod50 = (LinkedList<LodItem>)(lod80.clone());
+        levelOfDetailItems.put(50, lod50);
+
+        item = new LodItem();
+        item.lod = 50;
+        item.category = "highway";
+        item.tag = new Pair<String, String>("highway", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod50.add(item);
+
+        item = new LodItem();
+        item.lod = 50;
+        item.category = "highway_link";
+        item.tag = new Pair<String, String>("highway", "*");
+        item.shouldDraw = false;
+        item.needFurtherCalc = false;
+        lod50.add(item);
     }
 
     public boolean shouldDrawFurtherCalc(LodItem matchedLodItem, String category, List<Pair<String, String>> tags){
@@ -186,7 +249,7 @@ public class LevelOfDetailController {
 
     public int determinLod(double scale/* meters in one centimeter */){
 
-        return 75;
+        return 50;
 //        if (scale >=100 ){
 //            return 75;
 //        }
