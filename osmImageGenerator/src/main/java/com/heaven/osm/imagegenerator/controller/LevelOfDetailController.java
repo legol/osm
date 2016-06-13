@@ -36,7 +36,6 @@ public class LevelOfDetailController {
 
     public LevelOfDetailController(){
         levelOfDetailItems = new HashMap<Integer, LinkedList<LodItem>>();
-//        levelOfDetailItems.put(50, new LinkedList<LodItem>()); // no way at all. only province boundary, country boundary
 //        levelOfDetailItems.put(45, new LinkedList<LodItem>()); // only country boundary
 //        levelOfDetailItems.put(40, new LinkedList<LodItem>()); // only continent boundary
 
@@ -192,7 +191,7 @@ public class LevelOfDetailController {
         lod55.add(item);
 
         // 50  /////////////////////////////////////////////////////////////////////////////////
-        // no way at all
+        // no way at all, only province boundary, country boundary
         LinkedList<LodItem> lod50 = (LinkedList<LodItem>)(lod80.clone());
         levelOfDetailItems.put(50, lod50);
 
@@ -249,13 +248,65 @@ public class LevelOfDetailController {
 
     public int determinLod(double scale/* meters in one centimeter */){
 
-        return 50;
-//        if (scale >=100 ){
-//            return 75;
-//        }
-//        else{
-//            return 100;
-//        }
+        // scale                lod
+        // 20       -------     100
+        // 30       -------     100
+        // 50       -------     100
+        // 100      -------     100
+        // 300      -------     95
+        // 500      -------     90
+        // 1000     -------     85
+        // 2000     -------     80
+        // 5000     -------     75
+        // 10000    -------     70
+        // 20000    -------     65
+        // 30000    -------     65
+        // 50000    -------     60
+        // 100000   -------     55
+        // 300000   -------     55
+        // 500000   -------     50
+        // 1000000
+        // 3000000
+        // 5000000
+        // 10000000
+
+        if (scale <= 100){
+            return 100;
+        }
+        else if (scale <= 300){
+            return 95;
+        }
+        else if (scale <= 500){
+            return 90;
+        }
+        else if (scale <= 1000){
+            return 85;
+        }
+        else if (scale <= 2000){
+            return 80;
+        }
+        else if (scale <= 5000){
+            return 75;
+        }
+        else if (scale <= 10000){
+            return 70;
+        }
+        else if (scale <= 20000){
+            return 65;
+        }
+        else if (scale <= 50000){
+            return 60;
+        }
+        else if (scale <= 300000){
+            return 55;
+        }
+        else if (scale <= 500000){
+            return 50;
+        }
+        else{
+            return 50;
+        }
+
     }
 
 }

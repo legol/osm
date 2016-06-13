@@ -19,9 +19,11 @@ if (!MapLoader) {
         loadMap: function(lonIdx, latIdx, divId) {
             var latBase = 40.0552;
             var lonBase = 116.2882;
+            var latDelta = 0.004;
+            var lonDelta = 0.005;
 
-            var minLat = latBase - latIdx * 0.004;
-            var minLon = lonBase + lonIdx * 0.005;
+            var minLat = latBase - latIdx * latDelta;
+            var minLon = lonBase + lonIdx * lonDelta;
 
             var img = document.createElement("IMG");
             img.className = 'tile_img';

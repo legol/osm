@@ -103,7 +103,7 @@ public class StyleBuilder {
         Color innerClr = null;
 
         if (lod >= 100){
-            wayWidth1 = 22;
+            wayWidth1 = 10;
             wayWidth2 = 8;
             wayWidth3 = 4;
         }
@@ -224,7 +224,7 @@ public class StyleBuilder {
         Color innerClr = null;
 
         if (lod >= 100){
-            wayWidth1 = 22;
+            wayWidth1 = 10;
             wayWidth2 = 8;
             wayWidth3 = 4;
         }
