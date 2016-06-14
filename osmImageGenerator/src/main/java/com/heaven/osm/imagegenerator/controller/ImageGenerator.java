@@ -81,12 +81,14 @@ public class ImageGenerator {
         generateImageRequest.boundingBox = new GeomBox();
 
         double minlat = Double.parseDouble(request.getParameter("minlat"));
-        double minlot = Double.parseDouble(request.getParameter("minlon"));
+        double minlon = Double.parseDouble(request.getParameter("minlon"));
+        double maxlat = Double.parseDouble(request.getParameter("maxlat"));
+        double maxlon = Double.parseDouble(request.getParameter("maxlon"));
 
         generateImageRequest.boundingBox.minlat = minlat;
-        generateImageRequest.boundingBox.maxlat = minlat + 0.004;
-        generateImageRequest.boundingBox.minlon = minlot;
-        generateImageRequest.boundingBox.maxlon = minlot + 0.005;
+        generateImageRequest.boundingBox.maxlat = maxlat;
+        generateImageRequest.boundingBox.minlon = minlon;
+        generateImageRequest.boundingBox.maxlon = maxlon;
 
         generateImage(request, generateImageRequest, response);
     }

@@ -24,6 +24,8 @@ if (!MapLoader) {
 
             var minLat = latBase - latIdx * latDelta;
             var minLon = lonBase + lonIdx * lonDelta;
+            var maxLat = minLat + latDelta;
+            var maxLon = minLon + lonDelta;
 
             var img = document.createElement("IMG");
             img.className = 'tile_img';
@@ -33,7 +35,7 @@ if (!MapLoader) {
             $img = $(img); // jQuery-ize it.
             $img.attr(
                 'src',
-                "http://127.0.0.1:8081/osmImageGenerator/map?minlat=" + minLat + "&minlon=" + minLon
+                "http://127.0.0.1:8081/osmImageGenerator/map?minlat=" + minLat + "&minlon=" + minLon + "&maxlon=" + maxLon + "&maxlat=" + maxLat
             );
 
             //$divDebug = $("#" + divId + "_debug");
