@@ -21,6 +21,9 @@ if (!TileController) {
                 stop: $.proxy(this.onDragCanvas, this)
             });
 
+            $("#map_canvas").on("mousewheel", $.proxy(this.onMouseWheel, this));
+
+
             this.moveViewport(0, 0);
 
             this.data.scale = 1.0;
@@ -35,6 +38,15 @@ if (!TileController) {
 
             this.observeParentSizeChange();
             this.viewportChanged();
+        },
+
+        onMouseWheel: function(event){
+
+            var log = log4javascript.getDefaultLogger();
+            log.info("mousewheel deltaY=" + event.deltaY);
+
+
+            event.preventDefault();
         },
 
         onDragCanvas: function(event, ui){
