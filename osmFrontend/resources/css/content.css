@@ -22,8 +22,8 @@
 }
 
 .map_canvas {
-    height:20000000px;
-    width: 20000000px;
+    height:500px;
+    width: 500px;
     border: 1px solid #FF0000;
     border-radius: 0px;
     position: absolute;

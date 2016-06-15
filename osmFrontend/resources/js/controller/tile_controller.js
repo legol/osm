@@ -23,8 +23,7 @@ if (!TileController) {
 
             $("#map_canvas").on("mousewheel", $.proxy(this.onMouseWheel, this));
 
-
-            this.moveViewport(0, 0);
+            this.moveCanvas(0, 0);
 
             this.data.scale = 1.0;
             this.data.viewport = {left:-$("#map_canvas").position().left,
@@ -42,10 +41,36 @@ if (!TileController) {
 
         onMouseWheel: function(event){
 
-            var log = log4javascript.getDefaultLogger();
-            log.info("mousewheel deltaY=" + event.deltaY);
+            var scale = 1.0;
+            if (event.deltaY >= 0){
+                scale = 2.0;
+            }
+            else if (event.deltaY <= 0){
+                scale = 0.5;
+            }
 
+            // calculate new offset
+            // vec_offset_canvas_to_document + vec_offset_relative_to_canvas = vec_mouse_relative_to_document
+            // so, vec_mouse_relative_to_document - vec_offset_relative_to_canvas = new vec_offset_canvas_to_document
+            var oldOffset = {
+                left:$("#map_canvas").offset().left,
+                top:$("#map_canvas").offset().top
+            };
 
+            var posRelativeToCanvas = {
+                left: event.pageX - oldOffset.left,
+                top: event.pageY - oldOffset.top
+            };
+
+            var newViewportOffset = {
+                left:event.pageX - posRelativeToCanvas.left * scale,
+                top: event.pageY - posRelativeToCanvas.top * scale
+            };
+
+            $("#map_canvas").css('-webkit-transform', 'scale(' + scale + ')');
+            this.moveCanvas(newViewportOffset.left, newViewportOffset.top);
+
+            this.viewportChanged();
             event.preventDefault();
         },
 
@@ -53,10 +78,10 @@ if (!TileController) {
             this.viewportChanged();
         },
 
-        moveViewport: function(newL, newT){
+        moveCanvas: function(newL, newT){
             $("#map_canvas").position({
                 my: "left top",
-                at: "left-"+newL + " top-"+newT,
+                at: "left+"+newL + " top+"+newT,
                 of: "#map_container",
                 collision: "none"
             });
