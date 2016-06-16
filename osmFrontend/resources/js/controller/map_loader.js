@@ -37,6 +37,10 @@ if (!MapLoader) {
                 'src',
                 "http://127.0.0.1:8081/osmImageGenerator/map?minlat=" + minLat + "&minlon=" + minLon + "&maxlon=" + maxLon + "&maxlat=" + maxLat
             );
+            $img.attr(
+                'draggable',
+                "false"
+            );
 
             //$divDebug = $("#" + divId + "_debug");
             //$divDebug.text($divDebug.text() + " (" + minLon + ", " + minLat + ")");

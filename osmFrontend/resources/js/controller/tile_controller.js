@@ -15,6 +15,7 @@ if (!TileController) {
             var log = log4javascript.getDefaultLogger();
             log.info("TileController initialized.");
 
+            // jquery.ui won't support scaled div, so I implemented my own drag.
             //$("#map_canvas").draggable({
             //    start: $.proxy(this.onDragStart, this),
             //    drag: $.proxy(this.onDrag, this),
@@ -83,7 +84,10 @@ if (!TileController) {
                 $("#map_canvas").css('-webkit-transform', 'scale(' + this.data.scale + ')');
                 this.moveCanvas(newViewportOffset.left, newViewportOffset.top);
                 this.viewportChanged();
-            this.data.scaling = true;
+
+                //this.data.tileWidth = 256 * this.data.scale;
+                //this.data.tileHeight = 256 * this.data.scale;
+            this.data.scaling = false;
 
             event.preventDefault();
 
@@ -99,8 +103,6 @@ if (!TileController) {
         didDrag: function(delta, ui) {
             var log = log4javascript.getDefaultLogger();
             log.info("didDrag.");
-
-
 
             this.onDragCanvas();
         },
@@ -191,7 +193,7 @@ if (!TileController) {
 
                         this.data.tileArray.push(newTile);
 
-                        window.mapLoader.loadMap(l/256, t/256, newTile.getId());
+                        window.mapLoader.loadMap(l/this.data.tileWidth, t/this.data.tileHeight, newTile.getId());
                     }
                     else{
                         //log.info("tile exists at: " + l + ", " + t);
