@@ -35,6 +35,9 @@ if (!TileController) {
             this.data.tileWidth = 256;
             this.data.tileHeight = 256;
 
+            this.data.scale = 1.0;
+            this.data.scaling = false;
+
             this.observeParentSizeChange();
             this.viewportChanged();
         },
@@ -48,6 +51,9 @@ if (!TileController) {
             else if (event.deltaY <= 0){
                 scale = 0.5;
             }
+
+            var oldScale = this.data.scale;
+            this.data.scale *= scale;
 
             // calculate new offset
             // vec_offset_canvas_to_document + vec_offset_relative_to_canvas = vec_mouse_relative_to_document
@@ -67,11 +73,14 @@ if (!TileController) {
                 top: event.pageY - posRelativeToCanvas.top * scale
             };
 
-            $("#map_canvas").css('-webkit-transform', 'scale(' + scale + ')');
-            this.moveCanvas(newViewportOffset.left, newViewportOffset.top);
+            this.data.scaling = true;
+                $("#map_canvas").css('-webkit-transform', 'scale(' + this.data.scale + ')');
+                this.moveCanvas(newViewportOffset.left, newViewportOffset.top);
+                this.viewportChanged();
+            this.data.scaling = true;
 
-            this.viewportChanged();
             event.preventDefault();
+
         },
 
         onDragCanvas: function(event, ui){
@@ -105,7 +114,9 @@ if (!TileController) {
 
             log.info("viewport=" + JSON.stringify(this.data.viewport));
 
-            this.tile();
+            if (!this.data.scaling){
+                this.tile();
+            }
         },
 
         tile: function() {
