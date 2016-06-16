@@ -15,10 +15,16 @@ if (!TileController) {
             var log = log4javascript.getDefaultLogger();
             log.info("TileController initialized.");
 
-            $("#map_canvas").draggable({
-                start: $.proxy(this.onDragCanvas, this),
-                drag: $.proxy(this.onDragCanvas, this),
-                stop: $.proxy(this.onDragCanvas, this)
+            //$("#map_canvas").draggable({
+            //    start: $.proxy(this.onDragStart, this),
+            //    drag: $.proxy(this.onDrag, this),
+            //    stop: $.proxy(this.onDragEnd, this)
+            //});
+
+            $("#map_canvas").drag({
+                willDrag: $.proxy(this.willDrag, this),
+                didDrag: $.proxy(this.didDrag, this),
+                dragEnd: $.proxy(this.dragEnd, this)
             });
 
             $("#map_canvas").on("mousewheel", $.proxy(this.onMouseWheel, this));
@@ -83,7 +89,30 @@ if (!TileController) {
 
         },
 
-        onDragCanvas: function(event, ui){
+        willDrag: function(ui) {
+            var log = log4javascript.getDefaultLogger();
+            log.info("will drag.");
+
+            this.onDragCanvas(event, ui);
+        },
+
+        didDrag: function(delta, ui) {
+            var log = log4javascript.getDefaultLogger();
+            log.info("didDrag.");
+
+
+
+            this.onDragCanvas();
+        },
+
+        dragEnd: function(ui) {
+            var log = log4javascript.getDefaultLogger();
+            log.info("drag end.");
+
+            this.onDragCanvas();
+        },
+
+        onDragCanvas: function(){
             this.viewportChanged();
         },
 
