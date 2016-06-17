@@ -153,20 +153,23 @@ if (!TileController) {
         tile: function() {
             var log = log4javascript.getDefaultLogger();
 
+            var scaledTileWidth = this.data.tileWidth * this.data.scale;
+            var scaledTileHeight = this.data.tileHeight * this.data.scale;
+
             // add missing tiles and remove redundant ones.
             var t = this.data.viewport.top;
             var b = this.data.viewport.top + this.data.viewport.height;
             var l = this.data.viewport.left;
             var r = this.data.viewport.left + this.data.viewport.width;
-            l = Math.floor(l / this.data.tileWidth) * this.data.tileWidth;
-            t = Math.floor(t / this.data.tileHeight) * this.data.tileHeight;
+            l = Math.floor(l / scaledTileWidth) * scaledTileWidth;
+            t = Math.floor(t / scaledTileHeight) * scaledTileHeight;
 
             log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
 
             while(t <= b){
 
                 var l = this.data.viewport.left;
-                l = Math.floor(l / this.data.tileWidth) * this.data.tileWidth;
+                l = Math.floor(l / scaledTileWidth) * scaledTileWidth;
 
                 log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
 
@@ -193,16 +196,16 @@ if (!TileController) {
 
                         this.data.tileArray.push(newTile);
 
-                        window.mapLoader.loadMap(l/this.data.tileWidth, t/this.data.tileHeight, newTile.getId());
+                        window.mapLoader.loadMap(l/scaledTileWidth, t/scaledTileHeight, newTile.getId());
                     }
                     else{
                         //log.info("tile exists at: " + l + ", " + t);
                     }
 
-                    l += this.data.tileWidth;
+                    l += scaledTileWidth;
                 }
 
-                t += this.data.tileHeight;
+                t += scaledTileHeight;
             }
         },
     };

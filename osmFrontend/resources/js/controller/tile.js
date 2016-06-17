@@ -42,7 +42,10 @@ if (!Tile) {
         addTo : function(parentId){
             document.getElementById(parentId).appendChild(this.data.div);
 
-            var jDiv = $("#" + this.getId());
+            var jDiv = $(this.data.div);
+            jDiv.offsetTop = 0;
+            jDiv.offsetLeft = 0;
+
             jDiv.position({
                 my: "left top",
                 at: "left+" + this.data.position.left + " top+" + this.data.position.top,
