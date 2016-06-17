@@ -32,7 +32,6 @@ if (!TileController) {
 
             this.moveCanvas(0, 0);
 
-            this.data.scale = 1.0;
             this.data.viewport = {left:-$("#map_canvas").position().left,
                 top:-$("#map_canvas").position().top,
                 width:$("#map_container").innerWidth(),
@@ -140,8 +139,8 @@ if (!TileController) {
 
             this.data.viewport = {left:-$("#map_canvas").position().left,
                 top:-$("#map_canvas").position().top,
-                width:$("#map_container").innerWidth(),
-                height:$("#map_container").innerHeight()};
+                width:$("#map_container").innerWidth() / this.data.scale,
+                height:$("#map_container").innerHeight() / this.data.scale};
 
             log.info("viewport=" + JSON.stringify(this.data.viewport));
 
@@ -161,7 +160,13 @@ if (!TileController) {
             var b = this.data.viewport.top + this.data.viewport.height;
             var l = this.data.viewport.left;
             var r = this.data.viewport.left + this.data.viewport.width;
-            l = Math.floor(l / scaledTileWidth) * scaledTileWidth;
+
+            if (l >= 0){
+                l = Math.floor(l / scaledTileWidth) * scaledTileWidth;
+            }
+            else{
+
+            }
             t = Math.floor(t / scaledTileHeight) * scaledTileHeight;
 
             log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
