@@ -152,8 +152,8 @@ if (!TileController) {
         tile: function() {
             var log = log4javascript.getDefaultLogger();
 
-            var scaledTileWidth = this.data.tileWidth * this.data.scale;
-            var scaledTileHeight = this.data.tileHeight * this.data.scale;
+            var tileWidth = this.data.tileWidth;
+            var tileHeight = this.data.tileHeight;
 
             // add missing tiles and remove redundant ones.
             var t = this.data.viewport.top;
@@ -161,20 +161,15 @@ if (!TileController) {
             var l = this.data.viewport.left;
             var r = this.data.viewport.left + this.data.viewport.width;
 
-            if (l >= 0){
-                l = Math.floor(l / scaledTileWidth) * scaledTileWidth;
-            }
-            else{
-
-            }
-            t = Math.floor(t / scaledTileHeight) * scaledTileHeight;
+            l = (l <= 0) ? Math.floor(l / tileWidth) * tileWidth : Math.ceil(l / tileWidth) * tileWidth;
+            t = (t <= 0) ? Math.floor(t / tileHeight) * tileHeight : Math.ceil(t / tileHeight) * tileHeight;
 
             log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
 
             while(t <= b){
 
                 var l = this.data.viewport.left;
-                l = Math.floor(l / scaledTileWidth) * scaledTileWidth;
+                l = (l <= 0) ? Math.floor(l / tileWidth) * tileWidth : Math.ceil(l / tileWidth) * tileWidth;
 
                 log.info("l, t, r, b = " + l + "," + t + "," + r + "," + b);
 
@@ -201,16 +196,16 @@ if (!TileController) {
 
                         this.data.tileArray.push(newTile);
 
-                        window.mapLoader.loadMap(l/scaledTileWidth, t/scaledTileHeight, newTile.getId());
+                        window.mapLoader.loadMap(l/tileWidth, t/tileHeight, newTile.getId());
                     }
                     else{
                         //log.info("tile exists at: " + l + ", " + t);
                     }
 
-                    l += scaledTileWidth;
+                    l += tileWidth;
                 }
 
-                t += scaledTileHeight;
+                t += tileHeight;
             }
         },
     };
