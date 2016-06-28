@@ -1,1 +1,3 @@
 zoom frontend.
+1. uniquely identify a tile
+2. tile after zoom.
