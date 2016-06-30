@@ -1,19 +1,20 @@
+var osmApplicationStyle = {
+  height:'100%',
+  width:'100%',
+  display: 'flex',
+  'flex-flow': 'column',
+};
+
 var Application = React.createClass({
   render: function() {
-    var elapsed = Math.round(this.props.elapsed  / 100);
-    var seconds = elapsed / 10 + (elapsed % 10 ? '' : '.0' );
-    var message =
-      'React has been successfully running for ' + seconds + ' seconds.';
-
-    return <p>{message}</p>;
+    return <div id="osm_application" style={osmApplicationStyle}>
+      <OsmHeader></OsmHeader>
+      <OsmContent></OsmContent>
+    </div>;
   }
 });
 
-var start = new Date().getTime();
-
-setInterval(function() {
-  ReactDOM.render(
-    <Application elapsed={new Date().getTime() - start} />,
+ReactDOM.render(
+    <Application/>,
     document.getElementById('container')
-  );
-}, 50);
+);

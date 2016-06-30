@@ -8,13 +8,12 @@
 }
 
 html, body {
-    width:198vw;
+    width:98vw;
     height:98vh;
     background: #eeeeda;
 }
 
 .container {
-    display: flex; /* or inline-flex */
     border: 2px solid #0078ae;
     border-radius: 5px;
     width:100%;

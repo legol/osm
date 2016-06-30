@@ -1,1 +1,1 @@
-./node_modules/.bin/babel --presets es2015,react components/main.jsx --out-dir=dist
+./node_modules/.bin/babel --presets es2015,react --watch components --out-dir=dist/components
