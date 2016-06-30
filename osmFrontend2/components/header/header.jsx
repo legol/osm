@@ -3,6 +3,7 @@
  */
 var osmHeaderStyle = {
     height:'30px',
+    width:'100%',
     background: '#ff0000',
     border: '1px solid #550000',
 };

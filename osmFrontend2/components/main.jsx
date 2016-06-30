@@ -2,7 +2,7 @@ var osmApplicationStyle = {
   height:'100%',
   width:'100%',
   display: 'flex',
-  'flex-flow': 'column',
+  'flexDirection': 'column',
 };
 
 var Application = React.createClass({
