@@ -4,8 +4,8 @@
 var leftPanelStyle = {
     height:'100%',
     width:'200px',
-    background: '#00ff00',
-    border: '1px solid #005500',
+    border: '1px solid #FF0000',
+    marginLeft:'0px',
 };
 
 var LeftPanel = React.createClass({

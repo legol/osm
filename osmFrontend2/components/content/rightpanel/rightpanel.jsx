@@ -4,8 +4,8 @@
 var rightPanelStyle = {
     height:'100%',
     width:'50px',
-    background: '#00ff00',
-    border: '1px solid #005500',
+    border: '1px solid #FF0000',
+    marginRight:'0px',
 };
 
 var RightPanel = React.createClass({
