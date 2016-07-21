@@ -59,22 +59,26 @@ if (!TileController) {
             var oldScale = this.data.scale;
             this.data.scale *= scale;
 
+            // assume map_container is the document.
+            var mouseX = event.pageX - $("#map_container").offset().left;
+            var mouseY = event.pageY - $("#map_container").offset().top;
+
             // calculate new offset
             // vec_offset_canvas_to_document + vec_offset_relative_to_canvas = vec_mouse_relative_to_document
             // so, vec_mouse_relative_to_document - vec_offset_relative_to_canvas = new vec_offset_canvas_to_document
             var oldOffset = {
-                left:$("#map_canvas").offset().left,
-                top:$("#map_canvas").offset().top
+                left:$("#map_canvas").offsetToParent().left, // parent is map_container
+                top:$("#map_canvas").offsetToParent().top
             };
 
             var posRelativeToCanvas = {
-                left: event.pageX - oldOffset.left,
-                top: event.pageY - oldOffset.top
+                left: mouseX - oldOffset.left,
+                top: mouseY - oldOffset.top
             };
 
             var newViewportOffset = {
-                left:event.pageX - posRelativeToCanvas.left * scale,
-                top: event.pageY - posRelativeToCanvas.top * scale
+                left:mouseX - posRelativeToCanvas.left * scale,
+                top: mouseY - posRelativeToCanvas.top * scale
             };
 
             this.data.scaling = true;
