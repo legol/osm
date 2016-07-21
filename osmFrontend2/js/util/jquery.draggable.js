@@ -51,8 +51,8 @@
                 };
 
                 this.data.oldElementPosition = {
-                    x:$(this.data.target).position().left,
-                    y:$(this.data.target).position().top
+                    x:$(this.data.target).offsetToParent().left,
+                    y:$(this.data.target).offsetToParent().top
                 };
             },
 

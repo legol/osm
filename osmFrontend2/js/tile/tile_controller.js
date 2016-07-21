@@ -30,10 +30,8 @@ if (!TileController) {
 
             $("#map_canvas").on("mousewheel", $.proxy(this.onMouseWheel, this));
 
-            this.moveCanvas(0, 0);
-
-            this.data.viewport = {left:-$("#map_canvas").position().left,
-                top:-$("#map_canvas").position().top,
+            this.data.viewport = {left:-$("#map_canvas").offsetToParent().left,
+                top:-$("#map_canvas").offsetToParent().top,
                 width:$("#map_container").innerWidth(),
                 height:$("#map_container").innerHeight()};
 
@@ -137,8 +135,8 @@ if (!TileController) {
             var log = log4javascript.getDefaultLogger();
             log.info("TileController.viewportChanged() called.");
 
-            this.data.viewport = {left:-$("#map_canvas").position().left / this.data.scale,
-                top:-$("#map_canvas").position().top / this.data.scale,
+            this.data.viewport = {left:-$("#map_canvas").offsetToParent().left / this.data.scale,
+                top:-$("#map_canvas").offsetToParent().top / this.data.scale,
                 width:$("#map_container").innerWidth() / this.data.scale,
                 height:$("#map_container").innerHeight() / this.data.scale};
 
@@ -154,9 +152,6 @@ if (!TileController) {
 
             var tileWidth = this.data.tileWidth;
             var tileHeight = this.data.tileHeight;
-
-            var canvasLeft = $("#map_canvas").position().left;
-            var canvasTop = $("#map_canvas").position().top;
 
             // add missing tiles and remove redundant ones.
             var t = this.data.viewport.top;
